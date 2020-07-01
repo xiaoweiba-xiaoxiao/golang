@@ -3,7 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"localhost/golang/lesson/lesson12/testtag"
+
+	"xiao.com/golang/lesson/lesson12/testtag"
 )
 
 type User struct {

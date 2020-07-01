@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"localhost/golang/lesson/lesson12/clac"
+
+	"xiao.com/golang/lesson/lesson12/clac"
 )
 
 func testClac() {
