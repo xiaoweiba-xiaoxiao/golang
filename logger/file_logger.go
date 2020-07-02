@@ -42,7 +42,7 @@ func NewFileLog(msg map[string]string) (log Logger, err error) {
 	if err != nil {
 		chanNum = 50000
 	}
-	logSpiltType, ok := msg["log_spilt_type"]
+	logSpiltType, ok := msg["log_split_type"]
 	if !ok {
 		logSpiltType = "time"
 	}
@@ -95,10 +95,10 @@ func (f *Filelog) splitByTime(warnTag bool) {
 		return
 	}
 	file := f.file
-	newLogFilestr := fmt.Sprintf("%s/%s_04%d02%d02%d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day())
+	newLogFilestr := fmt.Sprintf("%s/%s_%04d%02d%02d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day())
 	filename := fmt.Sprintf("%s/%s", f.logPath, f.logFile)
 	if warnTag {
-		newLogFilestr = fmt.Sprintf("%s/%s.wf_04%d02%d02%d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day())
+		newLogFilestr = fmt.Sprintf("%s/%s.wf_%04d%02d%02d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day())
 		filename = fmt.Sprintf("%s/%s.wf", f.logPath, f.logFile)
 		file = f.warnFile
 	}
@@ -128,10 +128,10 @@ func (f *Filelog) splitBySize(warnTag bool) {
 		return
 	}
 	now := time.Now()
-	newLogFilestr := fmt.Sprintf("%s/%s_04%d02%d02%d02%d02%d02%d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
+	newLogFilestr := fmt.Sprintf("%s/%s_%04d%02d%02d%02d%02d%02d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
 	filename := fmt.Sprintf("%s/%s", f.logPath, f.logFile)
 	if warnTag {
-		newLogFilestr = fmt.Sprintf("%s/%s.wf_04%d02%d02%d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day())
+		newLogFilestr = fmt.Sprintf("%s/%s.wf_%04d%02d%02d%02d%02d%02d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day())
 		filename = fmt.Sprintf("%s/%s.wf", f.logPath, f.logFile)
 	}
 	file.Close()
