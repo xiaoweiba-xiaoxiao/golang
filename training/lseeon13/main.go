@@ -30,7 +30,7 @@ func main() {
 			stu.Modify(stus)
 		case 3:
 			for _, val := range *stus {
-				val.show()
+				val.showMenu()
 			}
 		case 4:
 			os.Exit(0)
