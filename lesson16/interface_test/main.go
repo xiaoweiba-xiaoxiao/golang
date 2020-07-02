@@ -12,18 +12,18 @@ type Xiannv interface {
 type xiaoxiao struct {
 }
 
-func (x xiaoxiao) Butiful() {
-	fmt.Println("xiaoxiao is very butiful")
+func (x *xiaoxiao) Butiful() {
+	fmt.Println("xiaoxiao is butiful girl")
 }
 
-func (x xiaoxiao) Lovely() {
-	fmt.Println("xiaoxiao is lovely")
+func (x *xiaoxiao) Lovely() {
+	fmt.Println("xiaoxiao is lovely girl")
 }
 
 func main() {
 	var a xiaoxiao
 	var b Xiannv
-	b = a
+	b = &a
 	b.Butiful()
 	b.Lovely()
 }
