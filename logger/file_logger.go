@@ -55,12 +55,12 @@ func NewFileLog(msg map[string]string) (log Logger, err error) {
 		if err != nil {
 			logSplitSize = 104857600
 		}
-		fmt.Println(logSplitSize)
+		//fmt.Println(logSplitSize)
 		filelog.logSplitSize = logSplitSize
 	} else {
 		logSpiltType = "time"
 	}
-	fmt.Println(logSpiltType)
+	//fmt.Println(logSpiltType)
 	filelog.level = level
 	filelog.logFile = LogFile
 	filelog.logPath = LogPath
