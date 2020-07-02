@@ -9,6 +9,8 @@ const (
 	LeFatal
 )
 
+const ()
+
 func getLevel(level int) string {
 	switch level {
 	case LeDeBug:
@@ -28,7 +30,7 @@ func getLevel(level int) string {
 	}
 }
 
-func stringtoLevel(level string) int{
+func stringtoLevel(level string) int {
 	switch level {
 	case "debug":
 		return LeDeBug

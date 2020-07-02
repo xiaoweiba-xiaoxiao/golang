@@ -4,15 +4,19 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 )
 
 type Filelog struct {
-	level       int
-	logPath     string
-	logFile     string
-	file        *os.File
-	warnFile    *os.File
-	logDataChan chan *LogData
+	level        int
+	logPath      string
+	logFile      string
+	file         *os.File
+	warnFile     *os.File
+	logDataChan  chan *LogData
+	logSpiltType string
+	logSplitSize int64
+	lastDay      int
 }
 
 func NewFileLog(msg map[string]string) (log Logger, err error) {
@@ -38,10 +42,31 @@ func NewFileLog(msg map[string]string) (log Logger, err error) {
 	if err != nil {
 		chanNum = 50000
 	}
+	logSpiltType, ok := msg["log_spilt_type"]
+	if !ok {
+		logSpiltType = "time"
+	}
+	if logSpiltType == "size" {
+		logSplitSizeStr, ok := msg["log_split_size"]
+		if !ok {
+			logSplitSizeStr = "104857600"
+		}
+		logSplitSize, err := strconv.ParseInt(logSplitSizeStr, 10, 64)
+		if err != nil {
+			logSplitSize = 104857600
+		}
+		fmt.Println(logSplitSize)
+		filelog.logSplitSize = logSplitSize
+	} else {
+		logSpiltType = "time"
+	}
+	fmt.Println(logSpiltType)
 	filelog.level = level
 	filelog.logFile = LogFile
 	filelog.logPath = LogPath
 	filelog.logDataChan = make(chan *LogData, chanNum)
+	filelog.logSpiltType = logSpiltType
+	filelog.lastDay = time.Now().Day()
 	log = filelog
 	filelog.Init()
 	return
@@ -63,12 +88,81 @@ func (f *Filelog) Init() {
 	go f.writelog_d()
 }
 
+func (f *Filelog) splitByTime(warnTag bool) {
+	now := time.Now()
+	day := now.Day()
+	if day == f.lastDay {
+		return
+	}
+	file := f.file
+	newLogFilestr := fmt.Sprintf("%s/%s_04%d02%d02%d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day())
+	filename := fmt.Sprintf("%s/%s", f.logPath, f.logFile)
+	if warnTag {
+		newLogFilestr = fmt.Sprintf("%s/%s.wf_04%d02%d02%d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day())
+		filename = fmt.Sprintf("%s/%s.wf", f.logPath, f.logFile)
+		file = f.warnFile
+	}
+	file.Close()
+	os.Rename(filename, newLogFilestr)
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+	if err != nil {
+		return
+	}
+	if warnTag {
+		f.warnFile = file
+	} else {
+		f.file = file
+	}
+}
+
+func (f *Filelog) splitBySize(warnTag bool) {
+	file := f.file
+	if warnTag {
+		file = f.warnFile
+	}
+	infoStr, err := file.Stat()
+	if err != nil {
+		return
+	}
+	if fileSize := infoStr.Size(); fileSize < f.logSplitSize {
+		return
+	}
+	now := time.Now()
+	newLogFilestr := fmt.Sprintf("%s/%s_04%d02%d02%d02%d02%d02%d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
+	filename := fmt.Sprintf("%s/%s", f.logPath, f.logFile)
+	if warnTag {
+		newLogFilestr = fmt.Sprintf("%s/%s.wf_04%d02%d02%d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day())
+		filename = fmt.Sprintf("%s/%s.wf", f.logPath, f.logFile)
+	}
+	file.Close()
+	os.Rename(filename, newLogFilestr)
+	file, err = os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
+	if err != nil {
+		return
+	}
+	if warnTag {
+		f.warnFile = file
+	} else {
+		f.file = file
+	}
+}
+
+func (f *Filelog) checkSpilt(warnTag bool) {
+	switch f.logSpiltType {
+	case "time":
+		f.splitByTime(warnTag)
+	case "size":
+		f.splitBySize(warnTag)
+	}
+}
+
 func (f *Filelog) writelog_d() {
 	for logData := range f.logDataChan {
 		var file = f.file
 		if logData.WarnOrFatal {
 			file = f.warnFile
 		}
+		f.checkSpilt(logData.WarnOrFatal)
 		fmt.Fprintf(file, "%s: %s: (file%s:  function:%s line:%d) %s",
 			logData.TimeStr, logData.LevelStr, logData.FileName, logData.FuncName, logData.LineNo, logData.Message)
 		fmt.Fprintln(file)
