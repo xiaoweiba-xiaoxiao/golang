@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -10,7 +11,11 @@ func TestFileLog(t *testing.T) {
 		"log_file": "test.log",
 		"level":    "0",
 	}
-	log := NewFileLog(m)
+	log, err := NewFileLog(m)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		return
+	}
 	log.DeBug("ERROR: code %d", 32222)
 	log.Error("ERROR: %s", "test error")
 	log.Close()
@@ -21,7 +26,14 @@ func TestFileLog(t *testing.T) {
 }
 
 func TestConsole(t *testing.T) {
-	log := NewConsole(LeDeBug)
+	config := map[string]string{
+		"level": "debug",
+	}
+	log, err := NewConsole(config)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		return
+	}
 	log.DeBug("server is runing")
 	log.Error("server is runing Error")
 }

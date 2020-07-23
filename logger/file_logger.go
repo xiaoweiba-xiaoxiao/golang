@@ -7,39 +7,47 @@ import (
 )
 
 type Filelog struct {
-	level    int
-	logPath  string
-	logFile  string
-	file     *os.File
-	warnFile *os.File
+	level       int
+	logPath     string
+	logFile     string
+	file        *os.File
+	warnFile    *os.File
+	logDataChan chan *LogData
 }
 
-func NewFileLog(msg map[string]string) Logger {
-	var filelog *Filelog = &Filelog{}
+func NewFileLog(msg map[string]string) (log Logger, err error) {
+	var filelog *Filelog
 	LogPath, ok := msg["log_path"]
 	if !ok {
 		LogPath = "/var/log/go.log"
 	}
-	filelog.logPath = LogPath
 	Level, ok := msg["log_level"]
 	if !ok {
-		Level = "0"
+		Level = "debug"
 	}
-	level, err := strconv.Atoi(Level)
-	if err != nil {
-		level = 0
-	}
-	filelog.level = level
+	level := stringtoLevel(Level)
 	LogFile, ok := msg["log_file"]
 	if !ok {
 		LogFile = "go.log"
 	}
+	logDataChan, ok := msg["log_chan_size"]
+	if !ok {
+		logDataChan = "50000"
+	}
+	chanNum, err := strconv.Atoi(logDataChan)
+	if err != nil {
+		chanNum = 50000
+	}
+	filelog.level = level
 	filelog.logFile = LogFile
-	filelog.init()
-	return filelog
+	filelog.logPath = LogPath
+	filelog.logDataChan = make(chan *LogData, chanNum)
+	log = filelog
+	filelog.Init()
+	return
 }
 
-func (f *Filelog) init() {
+func (f *Filelog) Init() {
 	filename := fmt.Sprintf("%s/%s", f.logPath, f.logFile)
 	file, err := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0664)
 	if err != nil {
@@ -52,6 +60,19 @@ func (f *Filelog) init() {
 		panic(fmt.Sprintf("open logfile %s failed,Error:%v", filename, err))
 	}
 	f.warnFile = file
+	go f.writelog_d()
+}
+
+func (f *Filelog) writelog_d() {
+	for logData := range f.logDataChan {
+		var file = f.file
+		if logData.WarnOrFatal {
+			file = f.warnFile
+		}
+		fmt.Fprintf(file, "%s: %s: (file%s:  function:%s line:%d) %s",
+			logData.TimeStr, logData.LevelStr, logData.FileName, logData.FuncName, logData.LineNo, logData.Message)
+		fmt.Fprintln(file)
+	}
 }
 
 func (f *Filelog) Setlevel(level int) {
@@ -65,40 +86,63 @@ func (f *Filelog) DeBug(fmtstr string, args ...interface{}) {
 	if f.level > LeDeBug {
 		return
 	}
-	writeLog(f.file, LeDeBug, fmtstr, args...)
-
+	LogData := writeLog(LeDeBug, fmtstr, args...)
+	select {
+	case f.logDataChan <- LogData:
+	default:
+	}
 }
 
 func (f *Filelog) Trace(fmtstr string, args ...interface{}) {
 	if f.level > LeTrace {
 		return
 	}
-	writeLog(f.file, LeTrace, fmtstr, args...)
+	LogData := writeLog(LeTrace, fmtstr, args...)
+	select {
+	case f.logDataChan <- LogData:
+	default:
+	}
 }
 
 func (f *Filelog) Info(fmtstr string, args ...interface{}) {
 	if f.level > LeInfo {
 		return
 	}
-	writeLog(f.file, LeInfo, fmtstr, args...)
+	LogData := writeLog(LeInfo, fmtstr, args...)
+	select {
+	case f.logDataChan <- LogData:
+	default:
+	}
 }
 
 func (f *Filelog) Warn(fmtstr string, args ...interface{}) {
 	if f.level > LeWarn {
 		return
 	}
-	writeLog(f.file, LeWarn, fmtstr, args...)
+	LogData := writeLog(LeWarn, fmtstr, args...)
+	select {
+	case f.logDataChan <- LogData:
+	default:
+	}
 }
 
 func (f *Filelog) Error(fmtstr string, args ...interface{}) {
 	if f.level > LeError {
 		return
 	}
-	writeLog(f.warnFile, LeError, fmtstr, args...)
+	LogData := writeLog(LeError, fmtstr, args...)
+	select {
+	case f.logDataChan <- LogData:
+	default:
+	}
 }
 
 func (f *Filelog) Fatal(fmtstr string, args ...interface{}) {
-	writeLog(f.warnFile, LeFatal, fmtstr, args...)
+	LogData := writeLog(LeFatal, fmtstr, args...)
+	select {
+	case f.logDataChan <- LogData:
+	default:
+	}
 }
 
 func (f *Filelog) Close() {
