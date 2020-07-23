@@ -32,7 +32,7 @@ func run() {
 }
 
 func main() {
-	initLogger("console", "/home/golang/log", "test.log", "debug")
+	initLogger("file", "/home/golang/log", "test.log", "debug")
 	run()
 	return
 }

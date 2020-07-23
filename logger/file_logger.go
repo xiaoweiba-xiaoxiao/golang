@@ -16,7 +16,7 @@ type Filelog struct {
 }
 
 func NewFileLog(msg map[string]string) (log Logger, err error) {
-	var filelog *Filelog
+	var filelog *Filelog = &Filelog{}
 	LogPath, ok := msg["log_path"]
 	if !ok {
 		LogPath = "/var/log/go.log"
