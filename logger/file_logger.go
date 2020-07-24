@@ -55,12 +55,12 @@ func NewFileLog(msg map[string]string) (log Logger, err error) {
 		if err != nil {
 			logSplitSize = 104857600
 		}
-		fmt.Println(logSplitSize)
+		//fmt.Println(logSplitSize)
 		filelog.logSplitSize = logSplitSize
 	} else {
 		logSpiltType = "time"
 	}
-	fmt.Println(logSpiltType)
+	//fmt.Println(logSpiltType)
 	filelog.level = level
 	filelog.logFile = LogFile
 	filelog.logPath = LogPath
@@ -131,7 +131,7 @@ func (f *Filelog) splitBySize(warnTag bool) {
 	newLogFilestr := fmt.Sprintf("%s/%s_%04d%02d%02d%02d%02d%02d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
 	filename := fmt.Sprintf("%s/%s", f.logPath, f.logFile)
 	if warnTag {
-		newLogFilestr = fmt.Sprintf("%s/%s.wf_%04d%02d%02d%02d%02d%02d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day())
+		newLogFilestr = fmt.Sprintf("%s/%s.wf_%04d%02d%02d%02d%02d%02d", f.logPath, f.logFile, now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())
 		filename = fmt.Sprintf("%s/%s.wf", f.logPath, f.logFile)
 	}
 	file.Close()
