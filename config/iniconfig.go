@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	_ "reflect"
+	"strconv"
 	"strings"
 )
 
@@ -19,11 +20,11 @@ type ServerConfig struct {
 }
 
 type DBConfig struct {
+	UserName string `ini:"user"`
+	Passwd   string `ini:"passwd"`
+	DataBase string `ini:"database"`
 	Host     string `ini:"host"`
-	Port     int    `ini: "port"`
-	UserName string `ini: "username"`
-	Passwd   string `ini: "password"`
-	DataBase string `ini: database`
+	Port     int    `ini:"port"`
 }
 
 func Marshal(data interface{}) (result []byte, err error) {
@@ -63,15 +64,11 @@ func UnMarshal(data []byte, result interface{}) (err error) {
 			fmt.Println(lastFieldName)
 			continue
 		}
-		equlindex := strings.Index(line,"=")
-		if equlindex == -1 {
-			err = fmt.Errorf("syntax error,invalid section:%s  line:%d", line, index+1)
+		err = parseItem(lastFieldName, line, result)
+		if err != nil {
+			err = fmt.Errorf("%s line:%d", err, index+1)
 			return
 		}
-		tagname := line[:equlindex]
-		value := line[equlindex+1:]
-		for i := 0;i < 
-		
 	}
 	return
 }
@@ -99,6 +96,54 @@ func parseSection(line string, index int, typeStruct reflect.Type) (fieldName st
 				break
 			}
 		}
+	}
+	return
+}
+
+func parseItem(lastFieldName string, line string, result interface{}) (err error) {
+	equlindex := strings.Index(line, "=")
+	if equlindex == -1 {
+		err = fmt.Errorf("syntax error,invalid section:%s", line)
+		return
+	}
+	key := strings.TrimSpace(line[:equlindex])
+	val := strings.TrimSpace(line[equlindex+1:])
+	if len(key) == 0 {
+		err = fmt.Errorf("syntax error,invalid section:%s", line)
+		return
+	}
+	resultVal := reflect.ValueOf(result)
+	sectionVal := resultVal.Elem().FieldByName(lastFieldName)
+	sectionType := sectionVal.Type()
+	if sectionType.Kind() != reflect.Struct {
+		err = fmt.Errorf("field must be struct:%s", line)
+		return
+	}
+	keyFieldName := ""
+	for i := 0; i < sectionType.NumField(); i++ {
+		field := sectionType.Field(i)
+		if field.Tag.Get("ini") == key {
+			keyFieldName = field.Name
+			break
+		}
+	}
+	if len(keyFieldName) == 0 {
+		return
+	}
+	fieldval := sectionVal.FieldByName(keyFieldName)
+	if fieldval == reflect.ValueOf(nil) {
+		return
+	}
+	switch fieldval.Type().Kind() {
+	case reflect.String:
+		fieldval.SetString(val)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		intVal, ok := strconv.ParseInt(val, 10, 64)
+		if ok != nil {
+			err = ok
+			return
+		}
+		fieldval.SetInt(intVal)
 	}
 	return
 }
