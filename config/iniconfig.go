@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"reflect"
 	"strconv"
@@ -83,15 +84,29 @@ func Marshal(data interface{}) (result []byte, err error) {
 	return
 }
 
-func WriteFile(file string, data []byte) (err error) {
+func WriteFile(file string, data interface{}) (err error) {
+	result, ok := Marshal(data)
+	if ok != nil {
+		return ok
+	}
 	f, err := os.OpenFile(file, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return
 	}
 	defer f.Close()
 	newWrite := bufio.NewWriter(f)
-	newWrite.Write(data)
+	newWrite.Write(result)
 	newWrite.Flush()
+	return
+}
+
+func ReadConf(file string, result interface{}) (err error) {
+	data, ok := ioutil.ReadFile(file)
+	if ok != nil {
+		err = ok
+		return
+	}
+	UnMarshal(data, result)
 	return
 }
 
