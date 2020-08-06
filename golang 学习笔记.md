@@ -2221,6 +2221,588 @@ func main(){
 }
 ```
 
+###### 7.3.7 指针接收者和值接受者
+
+指针接收者是指针实现了这个接口，值接受者是值实现的这个接口
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+type Animal interface{
+	Eat()
+	Talk()
+}
+
+type Dog struct{
+	name string
+}
+
+type Cat struct{
+	name string
+}
+
+func (d *Dog)Eat(){
+	fmt.Println("dog is eatting")
+}
+
+func (d *Dog)Talk(){
+	fmt.Printf("I am dog,my name is %s\n",d.name)
+}
+
+func (c Cat)Eat(){
+	fmt.Println("cat is eatting")
+}
+
+func (c Cat)Talk(){
+	fmt.Printf("I am cat,my name is %s\n",c.name)
+}
+
+func main(){
+	d := Dog{
+		name: "Lily",
+	}
+	c := Cat{
+		name: "Lucy",
+	}
+
+	var a1,a2 Animal
+	a1 = &d //是d的指针实现了这个接口所以需要传入一个接口，如果a1=d就是错误的
+	a1.Eat()
+	a1.Talk()
+	a2 = c
+	a2.Eat()
+	a2.Talk()
+}
+
+终端输出:
+dog is eatting
+I am dog,my name is Lily
+cat is eatting
+I am cat,my name is Lucy
+```
+
+###### 7.3.8 多接口
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+type Animal interface{
+	Eat()
+}
+
+type Pet interface{
+	peiban()
+}
+
+type Dog struct{
+	Name string
+}
 
 
-##### 8.反射
+func (d *Dog)Eat(){
+	fmt.Println("Dog is eatting")
+}
+
+func (d *Dog)peiban(){
+	fmt.Println("Dog peiban people")
+}
+
+func main(){
+	var a Animal
+	var p Pet
+	var d *Dog = &Dog{
+		Name: "maomao",
+	}
+	a = d
+	p = d
+	a.Eat()
+	p.peiban()
+}
+终端输出:
+API server listening at: 127.0.0.1:24037
+Dog is eatting
+Dog peiban people
+```
+
+###### 7.3.9 接口嵌套
+
+尽管 Go 语言没有提供继承机制，但可以通过嵌套其他的接口，创建一个新接口。
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+type Animal interface{
+	Eat()
+}
+
+type Pet interface{
+	peiban()
+}
+
+type Lovely interface{
+	Animal
+	Pet
+} 
+
+type Dog struct{
+	Name string
+}
+
+
+func (d *Dog)Eat(){
+	fmt.Println("Dog is eatting")
+}
+
+func (d *Dog)peiban(){
+	fmt.Println("Dog peiban people")
+}
+
+func main(){
+	var l Lovely
+	var d *Dog = &Dog{
+		Name: "maomao",
+	}
+	l = d
+	l.Eat()
+	l.peiban()
+}
+终端输出:
+API server listening at: 127.0.0.1:19039
+Dog is eatting
+Dog peiban people
+
+Lovely就是一个新接口，包含了Animal和Pet的接口签名方法
+Dog的指针实现了Animal和Pet接口，所以他就实现了Lovely接口
+```
+
+###### 7.3.10 接口零值
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+type Test interface{
+	Test()
+}
+
+type A struct{
+
+}
+
+func (a A)Test(){
+	fmt.Println(true)
+}
+
+func main(){
+	var t Test
+	if t == nil {
+		a := A{}
+		t = a
+		a.Test()
+	}
+}
+
+终端输出:
+API server listening at: 127.0.0.1:21973
+true
+```
+
+##### 8. IO
+
+###### 8.1 格式化输⼊
+
+ 从终端获取⽤户的输⼊
+
+fmt.Scanf(format string, a…interface{}): 格式化输⼊，空格作为分隔符，占位符和
+
+ 格式化输出⼀致
+
+fmt.Scan(a …interface{}): 从终端获取⽤户输⼊，存储在**Scanln**中的参数⾥，空格和换⾏符
+
+ 作为分隔符
+
+fmt.Scanln(a …interface{}): 从终端获取⽤户输⼊，存储在**Scanln**中的参数⾥，空格作为分隔符，
+
+遇到换⾏符结束
+
+```go
+import (
+	"fmt"
+)
+
+var str1,str2 string
+
+func testInput(){
+	fmt.Scanf("%s%s",&str1,&str2)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+}
+//遇到换行符事结束用户输入
+
+package main
+
+import (
+	"fmt"
+)
+
+var str1,str2 string
+
+func testInput(){
+	fmt.Scan(&str1,&str2)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+}
+//输入完成后结束输出
+package main
+
+import (
+	"fmt"
+)
+
+var str1,str2 string
+
+func testInput(){
+	fmt.Scanln(&str1,&str2)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+}
+//遇到换行符就结束用户输入
+
+import (
+	"fmt"
+)
+
+var str1,str2 string
+
+func testInput(){
+	fmt.Scanf("%s\n%s",&str1,&str2)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+}
+//\n可以占位\n所以可以隔行输入
+```
+
+###### 8.2 从字符串格式化输入
+
+fmt.Sscanf(str, format string, a…interface{}): 格式化输⼊，空格作为分隔符，占位符和
+
+ 格式化输出⼀致
+
+fmt.Sscan(str string, a …interface{}): 从终端获取⽤户输⼊，存储在**Scanln**中的参数⾥，
+
+空格和换⾏符作为分隔符
+
+fmt.Sscanln(str string, a …interface{}): 从终端获取⽤户输⼊，存储在**Scanln**中的参数⾥，
+
+空格作为分隔符，遇到换⾏符结束
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+var str1,str2,str3 string
+var str = "hello world !"
+
+func testInput(){
+	fmt.Sscanf(str,"%s%s%s",&str1,&str2,&str3)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+	fmt.Println(str3)
+}
+终端输出：
+API server listening at: 127.0.0.1:20797
+hello
+world
+!
+
+
+package main
+
+import (
+	"fmt"
+)
+
+var str1,str2,str3 string
+var str = "hello\nworld\n!"
+
+func testInput(){
+	fmt.Sscanf(str,"%s%s%s",&str1,&str2,&str3)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+	fmt.Println(str3)
+}
+终端输出:
+hello
+
+package main
+
+import (
+	"fmt"
+)
+
+var str1,str2,str3 string
+var str = "hello\nworld\n!"
+
+func testInput(){
+	fmt.Sscanf(str,"%s\n%s\n%s",&str1,&str2,&str3)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+	fmt.Println(str3)
+}
+终端输出:
+API server listening at: 127.0.0.1:18615
+hello
+world
+!
+
+package main
+
+import (
+	"fmt"
+)
+
+var str1,str2,str3 string
+var str = "hello\nworld\n!"
+
+func testInput(){
+	fmt.Sscan(str,&str1,&str2,&str3)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+	fmt.Println(str3)
+}
+终端输出:
+API server listening at: 127.0.0.1:34727
+hello
+world
+!
+
+package main
+
+import (
+	"fmt"
+)
+
+var str1,str2,str3 string
+var str = "hello world !"
+
+func testInput(){
+	fmt.Sscan(str,&str1,&str2,&str3)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+	fmt.Println(str3)
+}
+
+终端输出:
+API server listening at: 127.0.0.1:10148
+hello
+world
+!
+
+package main
+
+import (
+	"fmt"
+)
+
+var str1,str2,str3 string
+var str = "hello\tworld\t!"
+
+func testInput(){
+	fmt.Sscan(str,&str1,&str2,&str3)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+	fmt.Println(str3)
+}
+
+
+package main
+
+import (
+	"fmt"
+)
+
+var str1,str2,str3 string
+var str = "hello world !"
+
+func testInput(){
+	fmt.Sscanln(str,&str1,&str2,&str3)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+	fmt.Println(str3)
+}
+终端输出:
+API server listening at: 127.0.0.1:48954
+hello
+world
+!
+
+package main
+
+import (
+	"fmt"
+)
+
+var str1,str2,str3 string
+var str = "hello\nworld\n!"
+
+func testInput(){
+	fmt.Sscanln(str,&str1,&str2,&str3)	
+}
+
+
+func main(){
+	testInput()
+	fmt.Println(str1)
+	fmt.Println(str2)
+	fmt.Println(str3)
+}
+终端输出:
+API server listening at: 127.0.0.1:42289
+hello
+
+```
+
+###### 8.3 格式化输出
+
+fmt.Sprintf(format string, a…interface{}): 格式化并返回字符串
+
+fmt.Sprintln(a …interface{}): 把零个或多个变量按空格进⾏格式化并换⾏，返回字符串
+
+fmt.Sprint(a …interface{}): 把零个或多个变量按空格进⾏格式化，返回字符串
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func testSprint(){
+	str := fmt.Sprintln("hello world!")
+	fmt.Println(str)
+	str = fmt.Sprintf("%s hello world!","hehe")
+	fmt.Println(str)
+	str = fmt.Sprint("hello world!")
+	fmt.Println(str)
+}
+
+func main(){
+	testSprint()
+}
+终端输出:
+API server listening at: 127.0.0.1:9921
+hello world!
+
+hehe hello world!
+hello world!
+
+
+```
+
+###### 8.4 终端输⼊输出
+
+终端其实是⼀个⽂件 
+
+终端相关⽂件的实例
+
+os.Stdin：标准输⼊的⽂件实例，类型为*File
+
+os.Stdout：标准输出的⽂件实例，类型为*File
+
+os.Stderr：标准错误输出的⽂件实例，类型为*File
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+var str1,str2 string
+
+func testOs(){
+	fmt.Fscanf(os.Stdin,"%s%s",&str1,&str2)
+	fmt.Fprintf(os.Stdout,"%s %s\n",str1,str2)
+}
+
+func main(){
+	testOs()
+}
+
+
+```
+
