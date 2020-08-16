@@ -512,7 +512,57 @@ for index,val = range arrInt{
 注：数组不能改变长度
 ```
 
+##### 4.2 切片
 
+切片是数组的引用，切片大小可以伸缩
+
+```go
+4.2.1 切片的申明
+方式一：
+var arrInt [8]int = {1,2,3,4,5,6,7,8}
+var splitInt []int = arrInt[0:4]
+方式二：
+splitInt := []int{1,2,3,4,5}
+切片的规则左开右闭
+4.2.2 切片修改
+切片自己不拥有任何数据。它只是底层数组的一种表示。对切片所做的任何修改都会反映在底层数组中。
+var arrInt [8]int = {1,2,3,4,5,6,7,8}
+var splitInt []int = arrInt[0:4]
+splitInt[0]=9
+//那么arrInt[0]的值也会变成9
+当多个切片共用相同的底层数组时，每个切片所做的更改将反映在数组中
+4.2.3 切片的容量和长度
+切片文法创建切片
+splitBool := make([]bool,3,3)
+//make 方法用于创建切片,channel,map
+//第一个参数是创建应用的类型，一个bool型的切片，第二个参数是切片的长度，第三个参数是切片的容量
+容量和长度可以改变
+长度是根据元素个数来确定的
+容量是根据初始容量乘以2，4，8以此类推进行扩容
+4.2.4 切片的追加元素
+split = append(split,eml)
+```
+
+##### 4.3 maps
+
+map是一种key-value的内置类型
+
+```go
+4.3.1 map的申明
+方式一
+var testMap map[string]int=map[string]int{
+    "first":1,
+    "second":2,
+}//[]内为key的类型，[]后为值的类型
+方式二
+利用make初始化
+var testMap map[string]int //这个map并没有初始化，不能直接使用 
+使用make 初始化
+testMap = make(map[string]int) //然后我们就可以对map进行操作
+testMap["first"] = 1
+testMap["third"] = 3
+
+```
 
 #### 5.字符串
 
@@ -3747,5 +3797,63 @@ func main() {
 终端输出:
 API server listening at: 127.0.0.1:35319
 {chunyan 2}
+```
+
+10.5 反射tag
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+	"reflect"
+)
+
+type Student struct {
+	Name string `yaml:"name"`
+	Sex  int    `yaml:"sex"`
+}
+
+func SexToString(sex int) string {
+	switch sex {
+	case reflect.ValueOf(1):
+		return "boy"
+	case reflect.ValueOf(2):
+		return "girl"
+	default:
+		return "boy"
+	}
+}
+
+func testReflectStruct(a interface{}) {
+	v := reflect.ValueOf(a)
+	t := v.Type()
+	if t.Elem().Name() != "Student" {
+		fmt.Fprintf(os.Stderr, "%v is not Student type", a)
+		return
+	}
+	var info map[string]interface{} = map[string]interface{}{}
+	for i := 0; i < t.Elem().NumField(); i++ {
+		var val interface{}
+		field := t.Elem().Field(i)
+		val = v.Elem().Field(i)
+		key := field.Tag.Get("yaml")
+		info[key] = fmt.Sprintf("%v", val)
+	}
+	fmt.Printf("%v", info)
+}
+
+func main() {
+	stu := Student{
+		Name: "chun",
+		Sex:  2,
+	}
+	testReflectStruct(&stu)
+}
+
+终端输出：
+API server listening at: 127.0.0.1:24685
+map[name:chun sex:2]
 ```
 
