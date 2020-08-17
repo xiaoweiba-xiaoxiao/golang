@@ -512,57 +512,7 @@ for index,val = range arrInt{
 注：数组不能改变长度
 ```
 
-##### 4.2 切片
 
-切片是数组的引用，切片大小可以伸缩
-
-```go
-4.2.1 切片的申明
-方式一：
-var arrInt [8]int = {1,2,3,4,5,6,7,8}
-var splitInt []int = arrInt[0:4]
-方式二：
-splitInt := []int{1,2,3,4,5}
-切片的规则左开右闭
-4.2.2 切片修改
-切片自己不拥有任何数据。它只是底层数组的一种表示。对切片所做的任何修改都会反映在底层数组中。
-var arrInt [8]int = {1,2,3,4,5,6,7,8}
-var splitInt []int = arrInt[0:4]
-splitInt[0]=9
-//那么arrInt[0]的值也会变成9
-当多个切片共用相同的底层数组时，每个切片所做的更改将反映在数组中
-4.2.3 切片的容量和长度
-切片文法创建切片
-splitBool := make([]bool,3,3)
-//make 方法用于创建切片,channel,map
-//第一个参数是创建应用的类型，一个bool型的切片，第二个参数是切片的长度，第三个参数是切片的容量
-容量和长度可以改变
-长度是根据元素个数来确定的
-容量是根据初始容量乘以2，4，8以此类推进行扩容
-4.2.4 切片的追加元素
-split = append(split,eml)
-```
-
-##### 4.3 maps
-
-map是一种key-value的内置类型
-
-```go
-4.3.1 map的申明
-方式一
-var testMap map[string]int=map[string]int{
-    "first":1,
-    "second":2,
-}//[]内为key的类型，[]后为值的类型
-方式二
-利用make初始化
-var testMap map[string]int //这个map并没有初始化，不能直接使用 
-使用make 初始化
-testMap = make(map[string]int) //然后我们就可以对map进行操作
-testMap["first"] = 1
-testMap["third"] = 3
-
-```
 
 #### 5.字符串
 
@@ -3376,6 +3326,7 @@ func main(){
 cat 命令实现
 
 ```go
+
 package main
 
 import (
@@ -3621,7 +3572,7 @@ name=chun
 sex=2
 ```
 
-###### 10.1reflect包
+###### 10.1 获取value和type
 
 reflect 包提供反射机制
 
@@ -3691,7 +3642,7 @@ API server listening at: 127.0.0.1:34516
 the type is main.Student
 ```
 
-reflect.Kind
+###### 10.2 reflect.Kind
 
 `reflect` 包中还有一个重要的类型：[`Kind`](https://golang.org/pkg/reflect/#Kind)。
 
@@ -3766,7 +3717,7 @@ const (
 )
 ```
 
-通过反射设置变量值
+###### 10.3 通过反射设置变量值
 
 ```go
 package main
@@ -3799,7 +3750,356 @@ API server listening at: 127.0.0.1:35319
 {chunyan 2}
 ```
 
-10.5 反射tag
+```go 
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+type Student struct {
+	Name string `ini:"name"`
+	Sex  int    `ini:"sex"`
+}
+
+func testRefectSetValue(a interface{}) {
+	t := reflect.ValueOf(a)
+	t.Elem().SetInt(10)
+}
+
+func main() {
+	a := 14
+	testRefectSetValue(&a)
+	fmt.Println(a)
+}
+终端输出:
+API server listening at: 127.0.0.1:44567
+10
+```
+
+以上的情况有个问题,一段代码来展示一下
+
+```go
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+type Student struct {
+	Name string `ini:"name"`
+	Sex  int    `ini:"sex"`
+}
+
+func testRefectSetValue(a interface{}) {
+	t := reflect.ValueOf(a)
+	t.Elem().SetFloat64(10) //假如我不知道a的类型，用float
+}
+
+func main() {
+	a := 14
+	testRefectSetValue(&a)
+	fmt.Println(a)
+}
+以上会触发panic
+终端输出:
+API server listening at: 127.0.0.1:39021
+panic: reflect: call of reflect.Value.SetFloat on int Value
+
+goroutine 1 [running]:
+reflect.Value.SetFloat(0x4bb560, 0xc0000ae010, 0x182, 0x4024000000000000)
+	/usr/local/go/src/reflect/value.go:1590 +0x130
+main.testRefectSetValue(0x4b6bc0, 0xc0000ae010)
+	/home/golang/writefile/lesson1/main.go:15 +0xa9
+main.main()
+	/home/golang/writefile/lesson1/main.go:20 +0x6f
+Process exiting with code: 
+```
+
+改写一下:
+
+```go
+package main
+
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+type Student struct {
+	Name string `ini:"name"`
+	Sex  int    `ini:"sex"`
+}
+
+func testRefectSetValue(a interface{}) {
+
+	v := reflect.ValueOf(a)
+	t := v.Type().Kind()
+	if t != reflect.Ptr {
+		fmt.Println("input is not address!")
+		return
+	}
+	k := v.Elem().Kind()
+	switch k {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		v.Elem().SetInt(10)
+	case reflect.Float32, reflect.Float64:
+		v.Elem().SetFloat(14.3)
+	default:
+		fmt.Println("unkown type")
+	}
+}
+
+func main() {
+	a := 14
+	testRefectSetValue(a)
+	testRefectSetValue(&a)
+	fmt.Println(a)
+	b := 11.23
+	testRefectSetValue(&b)
+	fmt.Println(b)
+	s := "hello"
+	testRefectSetValue(&s)
+	fmt.Println(s)
+}
+终端输出:
+API server listening at: 127.0.0.1:8751
+input is not address!
+10
+14.3
+unkown type
+hello
+```
+
+###### 10.4 结构体的反射
+
+```go
+10.4.1 获取结构体的类型和值
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+type Student struct {
+	Name string `ini:"name"`
+	Sex  int    `ini:"sex"`
+}
+
+func testRelectStruct(a interface{}) {
+	t := reflect.TypeOf(a) //获取实际的类型
+	v := reflect.ValueOf(a) //获取实际的值
+	fmt.Println(t)
+	fmt.Println(v)
+}
+
+func main() {
+	a := Student{
+		Name: "chun",
+		Sex:  2,
+	}
+	testRelectStruct(a)
+}
+终端输出:
+API server listening at: 127.0.0.1:38478
+main.Student
+{chun 2}
+
+10.4.2 获取字段和字段的值
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+type Student struct {
+	Name string `ini:"name"`
+	Sex  int    `ini:"sex"`
+}
+
+func testRelectStruct(a interface{}) {
+	t := reflect.TypeOf(a)
+	if t.Name() != "Student" { //t.Name() 获取类型的名字
+		fmt.Printf("%s is not Type Student", t.Name())
+		return
+	}
+	v := reflect.ValueOf(a)
+	for i := 0; i < v.NumField(); i++ {
+		Tfield, Vfield := t.Field(i), v.Field(i) //Tfield 是a 反射字段类型相关，Vfield 是a 反射字段值相关
+		fmt.Printf("field of %s is %s,value of field %s is %v\n", Tfield.Name, Tfield.Type.Kind(), Tfield.Name, Vfield)
+	}
+}
+
+func main() {
+	a := Student{
+		Name: "chun",
+		Sex:  2,
+	}
+	testRelectStruct(a)
+}
+终端输出:
+API server listening at: 127.0.0.1:16675
+field of Name is string,value of field Name is chun
+field of Sex is int,value of field Sex is 2
+
+10.4.3 修改字段值
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+type Student struct {
+	Name string `ini:"name"`
+	Sex  int    `ini:"sex"`
+}
+
+func testRelectStruct(a interface{}) {
+	t := reflect.TypeOf(a)
+	if t.Kind() != reflect.Ptr {
+		fmt.Printf("the agrs must address")
+		return
+	}
+	if t.Elem().Name() != "Student" { //t.Name() 获取类型的名字
+		fmt.Printf("%s is not Type Student", t.Name())
+		return
+	}
+	v := reflect.ValueOf(a)
+	for i := 0; i < v.Elem().NumField(); i++ {
+		Tfield, Vfield := t.Elem().Field(i), v.Elem().Field(i) //Tfield 是a 反射字段类型相关，Vfield 是a 反射字段值相关
+		k := Tfield.Type.Kind()
+		switch k {
+		case reflect.String:
+			Vfield.SetString("chunyan")
+		case reflect.Int:
+			Vfield.SetInt(2)
+		default:
+		}
+	}
+}
+
+func main() {
+	a := &Student{
+		Name: "chun",
+		Sex:  2,
+	}
+	testRelectStruct(a)
+	fmt.Println(*a)
+}
+
+10.4.5 获取方法
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+type Student struct {
+	Name string `ini:"name"`
+	Sex  int    `ini:"sex"`
+}
+
+func (s *Student) Study(course string) {
+	fmt.Printf("%s is study %s", s.Name, course)
+}
+
+func (s *Student) Score(course string, score float64) {
+	fmt.Printf("%s,score of %s is %f", s.Name, course, score)
+}
+
+func testRelectStruct(a interface{}) {
+	t := reflect.TypeOf(a)
+	if t.Kind() != reflect.Ptr {
+		fmt.Printf("the agrs must address")
+		return
+	}
+	if t.Elem().Name() != "Student" { //t.Name() 获取类型的名字
+		fmt.Printf("%s is not Type Student", t.Name())
+		return
+	}
+	for i := 0; i < t.NumMethod(); i++ {
+		met := t.Method(i)
+		fmt.Printf("%v,%v\n", met.Name, met.Type)
+	}
+}
+
+func main() {
+	a := &Student{
+		Name: "chun",
+		Sex:  2,
+	}
+	testRelectStruct(a)
+}
+终端输出:
+API server listening at: 127.0.0.1:22754
+Score,func(*main.Student, string, float64)
+Study,func(*main.Student, string)
+
+10.4.6 方法调用
+package main
+
+import (
+	"fmt"
+	"reflect"
+)
+
+type Student struct {
+	Name string `ini:"name"`
+	Sex  int    `ini:"sex"`
+}
+
+func (s *Student) Study(course string) {
+	fmt.Printf("%s is study %s\n", s.Name, course)
+}
+
+func (s *Student) Score(course string, score float64) {
+	fmt.Printf("%s,score of %s is %f\n", s.Name, course, score)
+}
+
+func testRelectStruct(a interface{}) {
+	t := reflect.TypeOf(a)
+	v := reflect.ValueOf(a)
+	if t.Kind() != reflect.Ptr {
+		fmt.Printf("the agrs must address")
+		return
+	}
+	if t.Elem().Name() != "Student" { //t.Name() 获取类型的名字
+		fmt.Printf("%s is not Type Student", t.Name())
+		return
+	}
+	met1 := v.MethodByName("Study")
+
+	var args1 []reflect.Value
+	var course string = "English"
+	args1 = append(args1, reflect.ValueOf(course))
+	met1.Call(args1)
+
+	met2 := v.MethodByName("Score")
+	var score float64 = 98.5
+	args1 = append(args1, reflect.ValueOf(score))
+	met2.Call(args1)
+}
+
+func main() {
+	a := &Student{
+		Name: "chun",
+		Sex:  2,
+	}
+	testRelectStruct(a)
+}
+终端输出:
+
+```
+
+###### 10.5 反射tag
 
 ```go
 package main
