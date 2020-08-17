@@ -1,9 +1,3 @@
-
-
-
-
-
-
 ## golang 学习笔记
 
 ### 一. go语言基础
@@ -4157,3 +4151,293 @@ API server listening at: 127.0.0.1:24685
 map[name:chun sex:2]
 ```
 
+##### 11.测试
+
+###### 11.1 单元测试
+
+testing
+
+A. testing包提供了自动化测试相关的框架
+
+B. 支持单元测试和压力测试
+
+```go
+package main
+
+func Add(a, b int) int {
+	return a + b
+}
+
+func Sub(a, b int) int {
+	return a - b
+}
+
+package main
+
+import (
+	"testing"
+)
+
+func TestAdd(t *testing.T) {
+	var a int = 10
+	var b int = 20
+	c := Add(a, b)
+	if c != 30 {
+		t.Fatalf("%d + %d = %d", a, b, c)
+	}
+	t.Logf("%d", c)
+}
+
+func TestSub(t *testing.T) {
+	var a int = 20
+	var b int = 10
+	c := Sub(a, b)
+	if c != 10 {
+		t.Fatalf("%d - %d = %d", a, b, c)
+	}
+	t.Logf("%d", c)
+}
+
+运行：go test -v
+终端输出:
+golang@python:~/lesson/lesson19/unit_test$ go test -v
+=== RUN   TestAdd
+    TestAdd: add_test.go:14: 30
+--- PASS: TestAdd (0.00s)
+=== RUN   TestSub
+    TestSub: add_test.go:24: 10
+--- PASS: TestSub (0.00s)
+PASS
+ok      xiao.com/golang/lesson/lesson19/unit_test       0.002s
+```
+
+###### 11.2 压力测试
+
+基准测试或压力测试必须以 Benchmark开头，并且只有参数，
+
+类型是*Testing.B
+
+```go
+package main
+
+import (
+	"testing"
+)
+
+func BenchmarkAdd(t *testing.B) {
+	for i := 0; i < 100000; i++ {
+		var a int = 10
+		var b int = 20
+		c := Add(a, b)
+		if c != 30 {
+			t.Fatalf("%d + %d = %d is wrong", a, b, c)
+		}
+		t.Logf("%d", c)
+	}
+}
+
+运行go test -bench .:
+golang@python:~/lesson/lesson19/unit_test$ go test -bench .
+goos: linux
+goarch: amd64
+pkg: xiao.com/golang/lesson/lesson19/unit_test
+BenchmarkAdd-2            526819              2073 ns/op
+--- BENCH: BenchmarkAdd-2
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+        ... [output truncated]
+PASS
+ok      xiao.com/golang/lesson/lesson19/unit_test       1.125s
+```
+
+
+
+###### 11.3 go test 命令
+
+
+
+```go
+package main
+
+import (
+	"testing"
+)
+
+func BenchmarkAdd(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		var a int = 10
+		var d int = 20
+		c := Add(a, d)
+		if c != 30 {
+			b.Fatalf("%d + %d = %d is wrong", a, d, c)
+		}
+		b.Logf("%d", c)
+	}
+}
+
+func BenchmarkSub(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		a := 10
+		d := 20
+		c := Sub(d, a)
+		if c != 10 {
+			b.Fatalf("%d - %d = %d is wrong", a, d, c)
+		}
+		b.Logf("%d", c)
+	}
+}
+go test -bench BenchmarkSub
+终端输出:
+golang@python:~/lesson/lesson19/unit_test$ go test -bench BenchmarkSub 
+goos: linux
+goarch: amd64
+pkg: xiao.com/golang/lesson/lesson19/unit_test
+BenchmarkSub-2            493924              2110 ns/op
+--- BENCH: BenchmarkSub-2
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+        ... [output truncated]
+PASS
+ok      xiao.com/golang/lesson/lesson19/unit_test       1.072s
+
+go test -bench . 测试所用例
+golang@python:~/lesson/lesson19/unit_test$ go test -bench .
+goos: linux
+goarch: amd64
+pkg: xiao.com/golang/lesson/lesson19/unit_test
+BenchmarkAdd-2            563209              4177 ns/op
+--- BENCH: BenchmarkAdd-2
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+    bench_test.go:15: 30
+        ... [output truncated]
+BenchmarkSub-2            474064              2125 ns/op
+--- BENCH: BenchmarkSub-2
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+    bench_test.go:27: 10
+        ... [output truncated]
+PASS
+ok      xiao.com/golang/lesson/lesson19/unit_test       4.388s
+```
+
+go test file file 单元测试某某文件
+
+###### 11.4 dlv调试
+
+A. go get github.com/derekparker/delve/cmd/dlv
+
+B. 默认安装到GOPATH的bin目录下
+
+C. 把安装目录设置到PATH环境变量中
+
+
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	for {
+		var i int
+		var curTime time.Time
+		time.Sleep(5 * time.Second)
+		i++
+		curTime = time.Now()
+		fmt.Printf("run %d count,cur time；%v\n", i, curTime)
+	}
+}
+
+Delve使用
+A. dlv命令， dlv debug 包的路径或源代码路径 dlv attach 进程ID
+B. Dlv会编译我们的程序，然后进入调试界面
+C. 进入调试界面后，就可以一步一步的执行的我们代码了
+b 设置断点
+c 开始调试
+next 
+step
+p 打印变量
+exit 退出
+goruntine 查看携程 多线程调试
+goruntine 携程名称
+
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func isPerm(n int) bool {
+	if n <= 1 {
+		return false
+	}
+	for i := 2; i < n; i++ {
+		if n%i == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func test1(c chan int) {
+	var i int
+	for {
+		i++
+		result := isPerm(i)
+		if !result {
+			c <- i
+		}
+	}
+}
+
+func test2(c chan int) {
+	for v := range c {
+		fmt.Println(v)
+	}
+}
+
+func main() {
+	var c chan int = make(chan int)
+	go test1(c)
+	go test2(c)
+
+	time.Sleep(time.Hour)
+}
+```
+
+##### 12 
