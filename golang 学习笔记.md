@@ -4440,4 +4440,296 @@ func main() {
 }
 ```
 
-##### 12 
+##### 12  panic defer recover
+
+###### 12.1 panic 是程序崩溃
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	var b int = 10
+	if b != 5 {
+		panic("%d is not 10")
+	}
+	fmt.Printf("%d", b)
+}
+终端输出:
+API server listening at: 127.0.0.1:13505
+panic: %d is not 10
+
+goroutine 1 [running]:
+main.main()
+	/home/golang/lesson/lesson20/panic_test/main.go:10 +0x44
+Process exiting with code: 0
+```
+
+当程序运行出现严重逻辑错误时，我们需要触发panic,来终止程序，不让他继续运行
+
+###### 12.2 defer
+
+defer 前面的章节已经有介绍，panic允许defer执行后再panic。
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	var b int = 10
+	defer func() {
+		fmt.Println("input is ", b)
+	}()
+	if b != 5 {
+		panic("b is not 5")
+	}
+}
+
+
+
+
+API server listening at: 127.0.0.1:30062
+input is  10
+panic: b is not 5
+
+goroutine 1 [running]:
+main.main()
+	/home/golang/lesson/lesson20/panic_test/main.go:13 +0xa2
+Process exiting with code: 0
+```
+
+###### 12.3 recover
+
+recover 恢复panic,使程序继续运行，recover必须再defer 的func中，recover的返回值为panic的返回值。
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func defFunc(b int) {
+	fmt.Println("input is ", b)
+	if r := recover(); r != nil {
+		fmt.Println("Recovered from panic that is: ", r)
+	}
+}
+
+func main() {
+	var b int = 10
+	defer defFunc(b)
+	if b != 5 {
+		panic("b is not 5")
+	}
+}
+终端输出:
+API server listening at: 127.0.0.1:17739
+input is  10
+Recovered from panic that is:  b is not 5
+Process exiting with code: 0
+```
+
+##### 13 多线程
+
+###### 13.1 并发和并行
+
+并发：同一时间段类执行多个操作。
+
+并行：同一时刻执行多个操作。
+
+多线程
+
+A. 线程是由操作系统进行管理，也就是处于内核态。
+
+B. 线程之间进行切换，需要发生用户态到内核态的切换。
+
+C. 当系统中运行大量线程，系统会变的非常慢。
+
+D. 用户态的线程，支持大量线程创建。也叫协程或goroutine。
+
+###### 13.2 goroutine
+
+goroutine是go的一个轻量级的并发方式，成为协程，以关键字go 加函数方法名
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func hello() {
+	fmt.Println("the goroutine")
+}
+
+func main() {
+	go hello() //go 开启一个新的进程，主进程并不会等待协程等待完毕再退出，所以需要等待时间延迟退出。
+	fmt.Println("the main")
+	time.Sleep(time.Second)
+}
+终端输出:
+API server listening at: 127.0.0.1:25262
+the main
+the goroutine
+```
+
+```go
+import (
+	"fmt"
+	"time"
+)
+
+func hello(i int) {
+	fmt.Println("hello this is %d", i)
+}
+
+func main() {
+	for i := 0; i < 10; i++ {
+		go hello(i)
+	}
+	time.Sleep(time.Second)
+}
+终端输出:
+API server listening at: 127.0.0.1:9102
+hello this is %d 3
+hello this is %d 9
+hello this is %d 0
+hello this is %d 4
+hello this is %d 1
+hello this is %d 5
+hello this is %d 2
+hello this is %d 6
+hello this is %d 7
+hello this is %d 8
+
+可以看到并发的特点是无序的
+```
+
+启动多个goroutine
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func printInt() {
+	for i := 0; i < 5; i++ {
+		time.Sleep(250 * time.Millisecond)
+		fmt.Printf("%d ", i)
+	}
+}
+
+func printChar() {
+	for i := 'a'; i < 'e'; i++ {
+		time.Sleep(400 * time.Millisecond)
+		fmt.Printf("%c ", i)
+	}
+}
+
+func main() {
+	go printInt() //启动一个goroutine,每250 毫秒打印一次数字
+	go printChar() //启动另一个goroutine,每400毫秒打印一次字节
+	time.Sleep(3000 * time.Millisecond)
+	fmt.Println()
+	fmt.Println("main terminated")
+}
+终端输出:
+API server listening at: 127.0.0.1:14728
+0 a 1 2 b 3 c 4 d 
+main terminated
+```
+
+###### 13.2 runtime
+
+多核控制
+
+A. 通过runtime包进行多核设置
+
+B. GOMAXPROCS设置当前程序运行时占用的cpu核数
+
+C. NumCPU获取当前系统的cpu核数
+
+```go
+package main
+
+import (
+	"fmt"
+	"runtime"
+	"time"
+)
+
+var i int
+
+func cale() {
+	for {
+		i++
+	}
+}
+
+func main() {
+	cpu := runtime.NumCPU() //获取CPU的个数
+	fmt.Printf("cpu: %d\n", cpu)
+
+	runtime.GOMAXPROCS(2) //设置CPU的使用个数
+	for i := 0; i < 10; i++ {
+		go cale()
+	}
+	time.Sleep(time.Minute)
+}
+终端输出:
+API server listening at: 127.0.0.1:7402
+cpu: 2
+再看看cpu的使用情况呢，会发生什么呢
+```
+
+###### 13.4 Goroutine原理浅析
+
+A. 一个操作系统线程对应用户态多个goroutine
+
+B. 同时使用多个操作系统线程
+
+C. 操作系统线程对goroutine是多对多关系，即M:N
+
+模型抽象
+
+A. 操作系统线程： M 内核线程
+
+B. 用户态线程（goroutine）: G
+
+C. 上下文对象：P （相当于一个处理器）
+
+![image-20200818153802109](assets/image-20200818153802109.png)
+
+goroutine调度
+
+![image-20200818153908364](assets/image-20200818153908364.png)
+
+以上这个图讲的是两个线程(内核线程)的情况。一个**M**会对应一个内核线程，一个**M**也会连接一个上下文**P**，一个上下文**P**相当于一个“处理器”，一个上下文连接一个或者多个Goroutine。为了运行goroutine，线程必须保存上下文。
+
+上下文P(Processor)的数量在启动时设置为`GOMAXPROCS`环境变量的值或通过运行时函数`GOMAXPROCS()`。通常情况下，在程序执行期间不会更改。上下文数量固定意味着只有固定数量的线程在任何时候运行Go代码。我们可以使用它来调整Go进程到个人计算机的调用，例如4核PC在4个线程上运行Go代码。
+
+图中P正在执行的`Goroutine`为蓝色的；处于待执行状态的`Goroutine`为灰色的，灰色的`Goroutine`形成了一个队列`runqueues`。
+
+Go语言里，启动一个goroutine很容易：go function 就行，所以每有一个go语句被执行，runqueue队列就在其末尾加入一个goroutine，一旦上下文运行goroutine直到调度点，它会从其runqueue中弹出goroutine，设置堆栈和指令指针并开始运行goroutine。
+
+一个很简单的例子就是系统调用`sysall`，一个线程肯定不能同时执行代码和系统调用被阻塞，这个时候，此线程M需要放弃当前的上下文环境P，以便可以让其他的`Goroutine`被调度执行。
+
+![image-20200818162049569](assets/image-20200818162049569.png)
+
+如上图左图所示，M0中的G0执行了syscall，然后就创建了一个M1(也有可能来自线程缓存)，（转向右图）然后M0丢弃了P，等待syscall的返回值，M1接受了P，将·继续执行`Goroutine`队列中的其他`Goroutine`。
+
+当系统调用syscall结束后，M0会“偷”一个上下文，如果不成功，M0就把它的Gouroutine G0放到一个全局的runqueue中，将自己置于线程缓存中并进入休眠状态。全局runqueue是各个P在运行完自己的本地的Goroutine runqueue后用来拉取新goroutine的地方。P也会周期性的检查这个全局runqueue上的goroutine，否则，全局runqueue上的goroutines可能得不到执行而饿死。
+
+##### 14 channel
+
