@@ -6,10 +6,8 @@ import (
 )
 
 func hello(i int) {
-	fmt.Println("hello this is %d", i)
+	fmt.Println("hello this is ", i)
 }
-
-func 
 
 func main() {
 	for i := 0; i < 10; i++ {
