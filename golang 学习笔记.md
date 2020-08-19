@@ -1,3 +1,9 @@
+
+
+
+
+
+
 ## golang 学习笔记
 
 ### 一. go语言基础
@@ -40,19 +46,54 @@ const (
     b
     c
 )
+iota，特殊常量，可以认为是一个可以被编译器修改的常量。
+iota 在 const关键字出现时将被重置为 0(const 内部的第一行之前)，const 中每新增一行常量声明将使 iota 计数一次(iota 可理解为 const 语句块中的行索引)。
+故上面结果abc为(1,2,3)
 ```
 
 ##### 1.3 数据类型:
 
-###### 1.3.1 数据类型介绍
+Go 也有基于架构的类型，例如：int、uint 和 uintptr。
+
+###### 1.3.1数字类型
+
+| 序号 | 类型和描述                                                   |
+| :--- | :----------------------------------------------------------- |
+| 1    | **uint8** 无符号 8 位整型 (0 到 255)                         |
+| 2    | **uint16** 无符号 16 位整型 (0 到 65535)                     |
+| 3    | **uint32** 无符号 32 位整型 (0 到 4294967295)                |
+| 4    | **uint64** 无符号 64 位整型 (0 到 18446744073709551615)      |
+| 5    | **int8** 有符号 8 位整型 (-128 到 127)                       |
+| 6    | **int16** 有符号 16 位整型 (-32768 到 32767)                 |
+| 7    | **int32** 有符号 32 位整型 (-2147483648 到 2147483647)       |
+| 8    | **int64** 有符号 64 位整型 (-9223372036854775808 到 9223372036854775807) |
+
+###### 1.3.2浮点型
+
+| 序号 | 类型和描述                        |
+| :--- | :-------------------------------- |
+| 1    | **float32** IEEE-754 32位浮点型数 |
+| 2    | **float64** IEEE-754 64位浮点型数 |
+| 3    | **complex64** 32 位实数和虚数     |
+| 4    | **complex128** 64 位实数和虚数    |
+
+------
+
+###### 1.3.3其他数字类型
+
+以下列出了其他更多的数字类型：
+
+| 序号 | 类型和描述                                                   |
+| :--- | :----------------------------------------------------------- |
+| 1    | **byte** 无符号 8 位整型 (0 到 255)                          |
+| 2    | **rune** **int32** 有符号 32 位整型 (-2147483648 到 2147483647) |
+| 3    | **uint** 32 或 64 位                                         |
+| 4    | **int** 与 uint 一样大小                                     |
+| 5    | **uintptr** 无符号整型，用于存放一个指针                     |
+
+###### 1.3.3.4 数据类型介绍
 
 ```go
-整数类型：
-int int8 int16 int32 int64
-uint uint8 uint16 uint32 uint64
-var a int
-a = 16
-
 bool类型
 var b bool
 b = true
@@ -77,7 +118,7 @@ var str string = "hello"
 
 ```
 
-###### 1.3.2 操作符
+###### 1.3.3.5操作符
 
 ```go
 bool 类型
@@ -108,9 +149,17 @@ strings.Join(a[]string, sep string) join操作
 
 操作符
 逻辑操作符
-==,!=, >, <, >=, <=,
+==,!=, >, <, >=, <=,&&，||,!
 运算算
-+ - * / %
++ - * / % >> << ^ & |
+A =   0011 1100
+B =   0000 1101
+A^B = 0011 0001
+A&B = 0000 1100
+A|B = 0011 1101
+var a int =2 
+a<<1 //4
+a>>1//2
 ```
 
 ##### 1.4 类型推导
@@ -120,6 +169,8 @@ go 可以根据赋值类型进行变量推导
 示例1
 b := 1 由1可以推导 b 为int类型
 c := false 由值推导出c是bool类型
+可以通过
+fmt.Printf(”%T/n",c)//可以输出类型
 ```
 
 
@@ -164,9 +215,108 @@ c := false 由值推导出c是bool类型
    b. ⼩写意味着这个函数/变量是私有的，包外部不能访问
 ```
 
+##### 1.6golang关键字
+
+| break    | default    | func   | interface | select |
+| -------- | ---------- | ------ | --------- | ------ |
+| case     | defer      | go     | map       | struct |
+| chan     | else       | goto   | package   | switch |
+| const    | fallthough | if     | range     | type   |
+| continue | for        | import | return    | var    |
+
+##### 1.7注释
+
+注释可以帮我们很好的完成文档的工作，写得好的注释可以方便我们以后的维护。
+
+/**/ 的块注释和 // 的单行注释两种注释风格， 
+
+包注释、结构体（接口）注释、函数（方法）注释、代码逻辑注释以及注释规范方面进行说明。
+
+###### 1.7.1包注释
+
+- 每个包都应该有一个包注释，一个位于package子句之前行注释
+- 包注释应该包含下面基本信息
+
+```go
+// @Title  请填写文件名称（需要改）
+// @Description  请填写文件描述（需要改）
+// @Author  请填写自己的真是姓名（需要改）  ${DATE} ${TIME}
+// @Update  请填写自己的真是姓名（需要改）  ${DATE} ${TIME}
+package ${GO_PACKAGE_NAME}
+```
+
+###### 1.7.2结构（接口）注释
+
+每个自定义的结构体或者接口都应该有注释说明，该注释对结构进行简要介绍，放在结构体定义的前一行，格式为： 结构体名， 结构体说明。同时结构体内的每个成员变量都要有说明，该说明放在成员变量的后面（注意对齐），实例如下：
+
+```go
+// User   用户对象，定义了用户的基础信息
+type User struct{
+    Username  string // 用户名
+    Email     string // 邮箱
+}
+```
+
+###### 1.7.3函数（方法）注释
+
+- 每个函数，或者方法（结构体或者接口下的函数称为方法）都应该有注释说明
+- 函数的注释应该包括三个方面
+
+```go
+// @title    函数名称
+// @description   函数的详细描述
+// @auth      作者             时间（2019/6/18   10:57 ）
+// @param     输入参数名        参数类型         "解释"
+// @return    返回参数名        参数类型         "解释"
+```
+
+###### 1.7.4代码逻辑注释
+
+- 每个代码块都要添加单行注释
+- 注视使用TODO 开始  详细如下
+
+```go
+// TODO  代码块的执行解释
+if   userAge < 18 {
+     
+}
+```
+
+###### 1.7.5注释要求
+
+- 统一使用中文注释，对于中英文字符之间严格使用空格分隔， 这个不仅仅是中文和英文之间，英文和中文标点之间也都要使用空格分隔
+- 全部使用单行注释，禁止使用多行注释
+- 和代码的规范一样，单行注释不要过长，禁止超过 120 字符。
+
+###### 1.7.6缩进和折行
+
+- 折行方面，一行最长不超过120个字符，超过的请使用换行展示，尽量保持格式优雅
+
+###### 1.7.7括号和空格
+
+括号和空格方面，也可以直接使用 gofmt 工具格式化（go 会强制左大括号不换行，换行会报语法错误），所有的运算符和操作数之间要留空格。
+
+###### 1.7.8import 规范
+
+```go
+// 单行引入
+import  "fmt"
+```
 
 
-#### 2. 函数
+
+```go
+// 多包引入，每包独占一行
+// 使用绝对路径，避免相对路径如 ../encoding/json
+import (
+     "strings"
+     "fmt"
+)
+```
+
+
+
+#### 2. 函数	
 
 函数是一块执行特定任务的代码。一个函数是在输入源基础上，通过执行一系列的算法，生成预期的输出。
 
@@ -204,6 +354,22 @@ func testFunc(a,b int)(sum int,mod int){
     mod = a%b
     return //当返回值被定义时，直接返回皆可
 }
+6.函数可以作为其他函数的参数进行传递，然后在其他函数内调用执行，一般称为回调
+package main
+
+    import "fmt"
+
+    func main() {
+        callback(2, Add)
+    }
+
+    func Add(x, y int) {
+        fmt.Println(x+y)
+    }
+
+    func callback(z int, f func(int, int)) {
+        f(z, 5)
+    }
 ```
 
 ##### 2.2  函数的调用
@@ -243,7 +409,7 @@ import (
 func main(){
     result := func (a int,b int) (int){
         retrun a + b
-    }(1,2) //匿名函数以及传参形式
+    }(1,2) //匿名函数以及传参形式,采用（）是直接去调用函数
     fmt.Println(result)
 }
 
@@ -268,14 +434,14 @@ package main
 import (
     "fmt"
 )
-
+//注意，函数里面如果对a,b等非指针进行修改，只是修改ab的副本值，实际的值没有发生改变
 func testFunc(fn func(int,int) int,a,b int) int{ //函数作为参数
     return fn(a,b)
 }
 
 func main(){
     result := func (a int,b int) int{
-        return a + b
+        return a + b  
     }
     fmt.Println(testFunc(result,1,3))    
 }
@@ -283,7 +449,7 @@ func main(){
 闭包就是返回一个函数
 func add() func(int) int{
     sum := 0
-    return funx(x int) int{ //返回一个函数
+    return func(x int) int{ //返回一个函数
         sum += x
         return sum
     }
@@ -450,7 +616,10 @@ for {
 3.2.5 特殊 for
 for (退出条件) {
 }
-
+3.2.6 for的死循环，相当于其他语言的while循环
+for ture{
+    
+}
 
 ```
 
@@ -475,13 +644,74 @@ func main(){
     case int:
         fmt.Println("a is int")
     case string:
-        fmt.Println("a is string")
+        fmt.Println("a is string"
     default:
         fmt.Println("can not reconized a's type")
     }    
+         /* 定义局部变量 */
+   var grade string = "B"
+   var marks int = 90
+
+   switch marks {
+      case 90: grade = "A"
+      case 80: grade = "B"
+      case 50,60,70 : grade = "C" //可以为多个值
+      default: grade = "D"  
+   }
+ 使用 fallthrough 会强制执行后面的 case 语句，fallthrough 不会判断下一条 case 的表达式结果是否为 true。
+ switch {
+    case false:
+            fmt.Println("1、case 条件语句为 false")
+            fallthrough
+    case true:
+            fmt.Println("2、case 条件语句为 true")
+            fallthrough
+    case false:
+            fmt.Println("3、case 条件语句为 false")
+            fallthrough
+    case true:
+            fmt.Println("4、case 条件语句为 true")
+    case false:
+            fmt.Println("5、case 条件语句为 false")
+            fallthrough
+    default:
+            fmt.Println("6、默认 case")
+    }
+        
+  
+
 }
+ 
 
 ```
+
+##### 3.4select 
+
+A "select" statement chooses which of a set of possible send or receive operations will proceed. It looks similar to a "switch" statement but with the cases all referring to communication operations.
+
+一个select语句用来选择哪个case中的发送或接收操作可以被立即执行。它类似于switch语句，但是它的case涉及到channel有关的I/O操作。
+
+```go
+select {
+  case communication clause  :
+    statement(s);    
+  case communication clause  :
+    statement(s);
+  // 你可以定义任意数量的 case 
+  default: // 可选 
+    statement(s);
+}
+每个 case 都必须是一个通信
+所有 channel 表达式都会被求值
+所有被发送的表达式都会被求值
+如果任意某个通信可以进行，它就执行，其他被忽略。
+如果有多个 case 都可以运行，Select 会随机公平地选出一个执行。其他不会执行。
+否则：
+如果有 default 子句，则执行该语句。
+如果没有 default 子句，select 将阻塞，直到某个通信可以运行；Go 不会重新对 channel 或值进行求值。
+```
+
+
 
 #### 4. 数组，切片，map
 
@@ -492,21 +722,193 @@ func main(){
 ```go
 4.1.1 数组声明
 var arrInt [8]int 声明一个长度为8,元素类型为int的数组
-4.1.2 数组初始化
+4.1.1 数组初始化
+arrInt=[8]int{1,2,3,4,5,6,7,8}
+4.1.3 数组声明和初始
 var arrInt [8]int = [8]int{1,2,3,4,5,6,7,8}
-4.1.3 数组赋值
+可以通过...系统来帮我确定长度
+arrint :=[...] int{1,2,3,4,5,6,7,8}
+4.1.4 数组赋值
 var arrInt [8]int = [8]int{}
 arrInt[0]=1
 fmt.Println(arrInt)
-4.1.4 数组遍历
+4.1.5 数组遍历
 var arrInt [8]int = [8]int{1,2,3,4,5,6,7,8}
 for index,val = range arrInt{
     fmt.Printf("arrInt[%d] is %d",index,val)
 }
+
+for i := 1; i < len(arrInt); i++ {
+		fmt.Println(arrInt[i])
+} 
 注：数组不能改变长度
 ```
 
+##### 4.2Map
 
+map是一堆未排序键值对的集合，map的key必须为可比较类型,比如 **==** 或 **!=**，map查找比线性查找快,但慢于索引查找(数组，切片)
+
+格式 var name map[keytype]valuetype
+
+```go
+var a map[int]int
+var b = map[string]string{}
+c := map[string]bool{}
+d := make(map[string]int)
+```
+
+###### 4.2.1map的初始化
+
+map类似于数组和切片,可以在定义时直接指定初始值 如:
+
+```go
+var a = map[string]string{"name": "sutao", "age": "26", "sex": "男"}
+```
+
+###### 4.2.2map元素访问
+
+上边定义并初始化了一个map,那么如何访问一个map中的元素呢？
+
+可以通过键(key)来访问指定的value 如:
+
+```go
+var a = map[string]string{"name": "sutao", "age": "26", "sex": "男"}
+fmt.Println(a["name"],a["age"])
+```
+
+###### 4.2.3修改map中的元素
+
+和数组一样,可以使用key来修改map中的元素
+
+```go
+var a = map[string]string{"name": "sutao", "age": "26", "sex": "男"}
+fmt.Println(a)
+a["name"] = "李四"
+fmt.Println(a)
+```
+
+###### 4.2.4新增元素
+
+与slice不同,map元素的新增不需要使用copy()函数 可以直接 `map[key] = value` 的方式增加元素 如:
+
+```
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    var a = map[string]string{"name": "wangchao", "age": "32", "sex": "男"}
+    a["girlfriend"] = "苍老师"
+    fmt.Println(a)
+}
+```
+
+###### 4.2.5删除元素
+
+比slice相比,map提供delete()函数进行元素的删除
+格式 `delete(map,key)` 如下例:
+
+```
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    var a = map[string]string{"name": "zhangsan", "age": "16", "sex": "男"}
+    delete(a, "name")
+    fmt.Println(a)
+}
+```
+
+###### 4.2.6map是引用类型
+
+map是引用类型,来看一个简单的例子
+
+```
+func main() {
+    var a = map[int]int{1: 1, 2: 2}
+    b := a
+    a[1] = 123456
+    fmt.Println(a, b)
+}
+```
+
+以上程序会输出 map[1:123456 2:2] map[1:123456 2:2]
+
+我们再传递进函数里面测试下,关于函数的定义后面我们会讲,此处只是一个demo
+
+```
+func main() {
+    var a = map[int]int{1: 1, 2: 2}
+    b := a
+    test(a)
+    fmt.Println(a, b)
+}
+
+func test(a map[int]int) {
+    a[1] = 111
+}
+```
+
+以上程序会输出 map[2:2 1:111] map[1:111 2:2] 或者 map[1:111 2:2] map[1:111 2:2]
+
+##### 4.3切片
+
+Go 数组的长度不可改变，在特定场景中这样的集合就不太适用，Go中提供了一种灵活，功能强悍的内置类型切片("动态数组"),与数组相比切片的长度是不固定的，可以追加元素，在追加时可能使切片的容量增大。
+
+- 基于数组或者slice生成一个slice的时候,新的slice和原来数组/slice 的底层数组是同一个
+
+- 基于数组或者slice生成slice的cap=原来对应的数组长度-现在slice的第一个元素对应的索引
+
+- slice 作为参数传递的是 副本,但是对应的数组的指针不变
+
+- 扩容规则:
+  在一般的情况下，你可以简单地认为新切片的容量（以下简称新容量）将会是原切片容量（以下
+  简称原容量）的 2 倍。
+  但是，当原切片的长度（以下简称原长度）大于或等于1024时，Go 语言将会以原容量的1.25
+  倍作为新容量的基准（以下新容量基准）
+
+  对于`slice`有几个有用的内置函数：
+
+  - `len` 获取`slice`的长度
+  - `cap` 获取`slice`的最大容量
+  - `append` 向`slice`里面追加一个或者多个元素，然后返回一个和`slice`一样类型的`slice`
+  - `copy` 函数`copy`从源`slice`的`src`中复制元素到目标`dst`，并且返回复制的元素的个数
+
+  注：`append`函数会改变`slice`所引用的数组的内容，从而影响到引用同一数组的其它`slice`。 但当`slice`中没有剩余空间（即`(cap-len) == 0`）时，此时将动态分配新的数组空间。返回的`slice`数组指针将指向这个空间，而原数组的内容将保持不变；其它引用此数组的`slice`则不受影响。
+
+```go
+type slice struct {
+    array unsafe.Pointer
+    len   int
+    cap   int
+}
+```
+
+
+
+```go
+// 声明一个数组
+var array = [10]byte{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'}
+// 声明两个slice
+var aSlice, bSlice []byte
+
+// 演示一些简便操作
+aSlice = array[:3] // 等价于aSlice = array[0:3] aSlice包含元素: a,b,c
+aSlice = array[5:] // 等价于aSlice = array[5:10] aSlice包含元素: f,g,h,i,j
+aSlice = array[:]  // 等价于aSlice = array[0:10] 这样aSlice包含了全部的元素
+
+// 从slice中获取slice
+aSlice = array[3:7]  // aSlice包含元素: d,e,f,g，len=4，cap=7
+bSlice = aSlice[1:3] // bSlice 包含aSlice[1], aSlice[2] 也就是含有: e,f
+bSlice = aSlice[:3]  // bSlice 包含 aSlice[0], aSlice[1], aSlice[2] 也就是含有: d,e,f
+bSlice = aSlice[0:5] // 对slice的slice可以在cap范围内扩展，此时bSlice包含：d,e,f,g,h
+bSlice = aSlice[:]   // bSlice包含所有aSlice的元素: d,e,f,g
+```
 
 #### 5.字符串
 
@@ -543,6 +945,19 @@ func main() {
 	}
 }
 输出:68 65 6c 6c 6f 20 77 6f 72 6c 64 21 为hello world Unicode UTF-8 编码的结果
+ps:golang是使用UTF8进行编码，一个中文是占3个字节
+    str := "你好"
+	fmt.Println(len(str))//6
+如果是打印字符串每个字符如果用for i循环，如果遇到中文会出现乱码情况
+	theme := "开始start"
+	for i := 0; i < len(theme); i++ {
+		fmt.Printf("ascii: %c  %d\n", theme[i], theme[i])
+	}
+原因：中文3个字节造成，解决方法用for each循环
+for _, s := range theme {
+		fmt.Printf("Unicode: %c  %d\n", s, s)
+	}
+分析range循环，内部使用rune的值，来进行整合，到时不会出现上面 for i乱码的情况
 
 package main
 
@@ -742,7 +1157,7 @@ func main(){
 	lenth(str)
 }
 
-len(str) 也可以获取字符串的长度
+len(str) 也可以获取字节的长度
 ```
 
 ##### 5.5  字符串不可变
@@ -818,10 +1233,12 @@ func main(){
 	a = &b
 	fmt.Printf("the type of a is %T\n",a)
 	fmt.Println("The adrres of a is", a)
+    fmt.Println("The value of a is", *a)
 }
 终端输出结果:
 Type of a is *int  
 address of b is 0x1040a124
+The value of is 5
 
 6.1.2 指针的零值：
 指针的零值（Zero Value）为nil
@@ -979,11 +1396,16 @@ func main(){
 
 
 
-##### 7.  面向对象
+#### 7.  面向对象
 
 ##### 7.1 结构体
 
-###### 7.1.1 结构体声明
+结构体（struct）是用户自定义的类型，它代表若干字段的集合，可以用于描述一个实体对象，类似java中的class，是golang面向对象编程的基础类型。
+结构体的概念在软件工程上旧的术语叫 ADT（抽象数据类型：Abstract Data Type）。在 C++ 它也存在，并且名字也是 struct，在面向对象的编程语言中，跟一个无方法的轻量级类一样。
+
+Go语言对关键字的增加非常吝啬，其中没有`private`、`protected`、`public`这样的关键 字。要使某个符号对其他包(`package`)可见(即可以访问)，需要将该符号定义为以大写字母开头
+
+##### 7.1.1 结构体声明
 
 结构体是用户定义的类型，表示若干个字段（Field）的集合。有时应该把数据整合在一起，而不是让这些数据没有联系。这种情况下可以使用结构体。
 
@@ -1145,7 +1567,7 @@ func main(){
 		Sex: 1,
 		Age: 31,
 	}
-	fmt.Println(employee.Name)//指针解引用
+	fmt.Println(employee.Name)//指针解引用struct 是指针的时候，编译器会把employees.field识别为（*employees).field
 }
 终端输出：
 API server listening at: 127.0.0.1:46671
@@ -1540,6 +1962,8 @@ true
 {"name":"xiaoxiao","Age":18,"Sex":2}
 //这是一个简单的应用。
 ```
+
+
 
 ##### 7.2 结构体方法
 
@@ -3202,7 +3626,18 @@ func main(){
 
 ###### 9.3 文件写入
 
+
+
 ```go
+   O_RDONLY int = syscall.O_RDONLY // open the file read-only.
+	O_WRONLY int = syscall.O_WRONLY // open the file write-only.
+	O_RDWR   int = syscall.O_RDWR   // open the file read-write.
+	// The remaining values may be or'ed in to control behavior.
+	O_APPEND int = syscall.O_APPEND // append data to the file when writing.
+	O_CREATE int = syscall.O_CREAT  // create a new file if none exists.
+	O_EXCL   int = syscall.O_EXCL   // used with O_CREATE, file must not exist.
+	O_SYNC   int = syscall.O_SYNC   // open for synchronous I/O.
+	O_TRUNC  int = syscall.O_TRUNC  // truncate regular writable file when opened.
 package main
 
 import (
@@ -3522,7 +3957,35 @@ API server listening at: 127.0.0.1:30377
 
 ##### 10.反射
 
-反射就是程序能够在运行时检查变量和值，求出它们的类型。
+在计算机科学领域，反射是指一类应用，它们能够自描述和自控制。也就是说，这类应用通过采用某种机制来实现对自己行为的描述（self-representation）和监测（examination），并能根据自身行为的状态和结果，调整或修改应用所描述行为的状态和相关的语义。
+
+每种语言的反射模型都不同，并且有些语言根本不支持反射。Golang语言实现了反射，反射机制就是在运行时动态的调用对象的方法和属性，官方自带的reflect包就是反射相关的，只要包含这个包就可以使用。
+
+Golang的gRPC也是通过反射实现的。
+
+- 变量包括（type, value）两部分
+
+  - 理解这一点就知道为什么nil != nil了
+
+- type 包括 static type和concrete type. 简单来说 static type是你在编码是看见的类型(如int、string)，concrete type是runtime系统看见的类型
+
+- 类型断言能否成功，取决于变量的concrete type，而不是static type. 因此，一个 reader变量如果它的concrete type也实现了write方法的话，它也可以被类型断言为writer.
+
+- Golang的指定类型的变量的类型是静态的（也就是指定int、string这些的变量，它的type是static type），在创建变量的时候就已经确定，反射主要与Golang的interface类型相关（它的type是concrete type），只有interface类型包含该两个指针,一个指针指向值的类型【对应concrete type】，另外一个指针指向实际的值【对应value】。
+
+- ```
+  ValueOf用来获取输入参数接口中的数据的值，如果接口为空则返回0
+  TypeOf用来动态获取输入参数接口中的值的类型，如果接口为空则返回nil
+  已知类型后转换为其对应的类型的做法如下，直接通过Interface方法然后强制转换：
+  	realValue := value.Interface().(已知的类型)
+      说明
+      转换的时候，如果转换的类型不完全符合，则直接panic，类型要求非常严格！
+      转换的时候，要区分是指针还是指
+      也就是说反射可以将“反射类型对象”再重新转换为“接口类型变量”
+      
+      
+   
+  ```
 
 ```go
 package main
@@ -4709,11 +5172,11 @@ B. 用户态线程（goroutine）: G
 
 C. 上下文对象：P （相当于一个处理器）
 
-![image-20200818153802109](assets/image-20200818153802109.png)
+![image-20200818153802109](F:/111/golang/assets/image-20200818153802109.png)
 
 goroutine调度
 
-![image-20200818153908364](assets/image-20200818153908364.png)
+![image-20200818153908364](F:/111/golang/assets/image-20200818153908364.png)
 
 以上这个图讲的是两个线程(内核线程)的情况。一个**M**会对应一个内核线程，一个**M**也会连接一个上下文**P**，一个上下文**P**相当于一个“处理器”，一个上下文连接一个或者多个Goroutine。为了运行goroutine，线程必须保存上下文。
 
@@ -4725,11 +5188,504 @@ Go语言里，启动一个goroutine很容易：go function 就行，所以每有
 
 一个很简单的例子就是系统调用`sysall`，一个线程肯定不能同时执行代码和系统调用被阻塞，这个时候，此线程M需要放弃当前的上下文环境P，以便可以让其他的`Goroutine`被调度执行。
 
-![image-20200818162049569](assets/image-20200818162049569.png)
+![image-20200818162049569](F:/111/golang/assets/image-20200818162049569.png)
 
 如上图左图所示，M0中的G0执行了syscall，然后就创建了一个M1(也有可能来自线程缓存)，（转向右图）然后M0丢弃了P，等待syscall的返回值，M1接受了P，将·继续执行`Goroutine`队列中的其他`Goroutine`。
 
 当系统调用syscall结束后，M0会“偷”一个上下文，如果不成功，M0就把它的Gouroutine G0放到一个全局的runqueue中，将自己置于线程缓存中并进入休眠状态。全局runqueue是各个P在运行完自己的本地的Goroutine runqueue后用来拉取新goroutine的地方。P也会周期性的检查这个全局runqueue上的goroutine，否则，全局runqueue上的goroutines可能得不到执行而饿死。
 
 ##### 14 channel
+
+信道可以想像成 Go 协程之间通信的管道。如同管道中的水会从一端流到另一端，通过使用信道，数据也可以从一端发送，在另一端接收。
+
+###### 14.1 信道的声明
+
+所有信道都关联了一个类型。信道只能运输这种类型的数据，而运输其他类型的数据都是非法的。
+
+`chan T` 表示 `T` 类型的信道。
+
+信道的零值为 `nil`。信道的零值没有什么用，应该像对 map 和切片所做的那样，用 `make` 来定义信道。
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func inputChan(c chan int) {
+	c <- 100 //通过信道接收值
+}
+
+func outputChan(c chan int) {
+	data := <-c //通过信道发送值
+	fmt.Println(data)
+}
+
+func main() {
+	var c chan int //未初始化的channel 是零值nil
+	if c == nil{
+		c = make(chan int)
+        fmt.Printf("type c is %T",c)
+	}
+	go inputChan(c)
+	go outputChan(c)
+	time.Sleep(time.Second)
+}
+终端输出:
+API server listening at: 127.0.0.1:19571
+type c is chan int
+100
+```
+
+通过信道进行发送和接收
+
+`c <-  100`
+
+`data := <- c`
+
+信道旁的箭头方向指定了是发送数据还是接收数据。
+
+在第一行，箭头对于 `a` 来说是向外指的，因此我们读取了信道 `a` 的值，并把该值存储到变量 `data`。
+
+在第二行，箭头指向了 `a`，因此我们在把数据写入信道 `a`。
+
+发送与接收默认是阻塞的
+
+发送与接收默认是阻塞的。这是什么意思？当把数据发送到信道时，程序控制会在发送数据的语句处发生阻塞，直到有其它 `Go` 协程从信道读取到数据，才会解除阻塞。与此类似，当读取信道的数据时，如果没有其它的协程把数据写入到这个信道，那么读取过程就会一直阻塞着。
+
+信道的这种特性能够帮助` Go` 协程之间进行高效的通信，不需要用到其他编程语言常见的显式锁或条件变量。
+
+前面我们写过一个`goroutine`的代码，需要用到`time.Sleep()`来等待协程结束
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func hello(){
+	fmt.Println("hello goroutine")
+}
+
+func main(){
+	go hello()
+	fmt.Println("main funcion end")
+	time.Sleep(time.Second)
+}
+终端输出:
+API server listening at: 127.0.0.1:42299
+main funcion end
+hello goroutine
+```
+
+需要使用休眠来等待`goroutine`执行结束。不然主线程不会等待`goroutine`执行完就退出，然后导致`goroutine`也跟着退出。
+
+现在我们使用channel来改写代码
+
+```go
+import (
+	"fmt"
+)
+
+func hello(c chan bool){
+	fmt.Println("hello goroutine")
+	c <- true
+}
+
+func main(){
+	c := make(chan bool)
+	go hello(c)
+	fmt.Println("main function end")
+	<-c
+}
+终端输出:
+API server listening at: 127.0.0.1:28527
+main function end
+hello goroutine
+```
+
+由于channel是双向阻塞的，在`<-c` 没有取到值时，它会一直阻塞，等到`c <- true` 写入信道以后，`<-c` 读取到值了，程序就不在阻塞。
+
+再写一个列子来更好的理解channel的阻塞
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func hello(c chan bool){
+	fmt.Println("hello goroutine")
+	time.Sleep(2 * time.Second)
+	fmt.Println("2 second later")
+	c <- true
+}
+
+func main(){
+	c := make(chan bool)
+	go hello(c)
+	<-c
+	fmt.Println("main function end")
+	
+}
+终端输出:
+先输出：hello goroutine
+2秒后再输出：2 second later
+然后把true写入信道
+main线程读取到信道中的值
+打印：main function end
+main执行完毕，程序结束
+```
+
+再写一个例子我们来更好的理解`channel`。
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func squreFunc(squre chan int,num int){
+	var sum int
+	for num != 0 {
+		d :=num % 10
+		sum += d *d
+		num /= 10
+	}
+	squre <- sum
+}
+
+func cubesFunc(cube chan int,num int){
+	var sum int
+	for num != 0 {
+		d :=num % 10
+		sum += d * d *d
+		num /= 10
+	}
+	cube <- sum
+}
+
+func main(){
+	num := 144
+	squre := make(chan int)
+	cube := make(chan int)
+	go squreFunc(squre,num)
+	go cubesFunc(cube,num)
+	squres,cubes := <-squre,<-cube
+	fmt.Println("Final output",squres+cubes)
+}
+```
+
+这个例子中，我们求一个数每位数的平方的和，和每位数上的立方的和，再将两位数上的和相加，协程`go squreFunc(squre,num)`，`go cubesFunc(cube,num)`分别执行求平方和和求立方方和，并将值写入写入信道`squre`，`cube`。`squres,cubes := <-squre,<-cube`，`squres`和`cubes`分别读取信道`squre`，`cube`，`squres + cubes`后打印
+
+`终端输出`：
+
+`API server listening at: 127.0.0.1:25540
+Final output 82`
+
+###### 14.2 死锁
+
+使用信道需要考虑的一个重点是死锁。当 Go 协程给一个信道发送数据时，照理说会有其他 Go 协程来接收数据。如果没有的话，程序就会在运行时触发 panic，形成死锁。
+
+同理，当有 Go 协程等着从一个信道接收数据时，我们期望其他的 Go 协程会向该信道写入数据，要不然程序就会触发 panic。
+
+```go
+package main
+
+import (
+	_"fmt"
+)
+
+func main(){
+	var c chan int = make(chan int)
+	<-c 
+}
+```
+
+由于程序只有读取`channel`  `c` 没有其他协程写入`channel`  `c` 的操作，就会形成死锁，触犯`panic`
+
+`终端输出`：
+
+`fatal error: all goroutines are asleep - deadlock!`
+
+`goroutine 1 [chan receive]:
+main.main()
+	/home/golang/writefile/lesson1/main.go:9 +0x52
+Process exiting with code: 0`
+
+同样如果只有写入，没有读取也会死锁
+
+```go
+package main
+
+import (
+	_"fmt"
+)
+
+func main(){
+	var c chan int = make(chan int)
+	c <- 5
+}
+```
+
+程序只往信道里面写入了数据，但是没有协程去读取信道，因此也会形成死锁，触犯panic
+
+`终端输出`：
+
+`fatal error: all goroutines are asleep - deadlock!`
+
+`goroutine 1 [chan send]:
+main.main()
+	/home/golang/writefile/lesson1/main.go:9 +0x55
+Process exiting with code: 0`
+
+如果在同一个协程里面写入和读取也会形成死锁，make(chan int),是一个不带缓冲区的信道，长度为0,也就是没有容量给它在一个线程种写入和读取
+
+```go
+package main
+
+import (
+	_"fmt"
+)
+
+func main(){
+	var c chan int = make(chan int)
+	c <- 5
+	<-c
+}
+
+```
+
+`终端输出`：
+
+`API server listening at: 127.0.0.1:29224
+fatal error: all goroutines are asleep - deadlock!`
+
+`goroutine 1 [chan send]:
+main.main()
+	/home/golang/writefile/lesson1/main.go:9 +0x55
+Process exiting with code: 0`
+
+###### 14.3 单向信道
+
+我们目前讨论的信道都是双向信道，即通过信道既能发送数据，又能接收数据。其实也可以创建单向信道，这种信道只能发送或者接收数据。
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func sendData(sendch chan<-int){
+	sendch <- 10
+}
+
+func main(){
+	var sendch chan int = make(chan <- int)
+	go sendData(sendch)
+	fmt.Println(<-sendch)
+}
+
+```
+
+上面程序的第 10 行，我们创建了唯送（Send Only）信道 `sendch`。`chan<- int` 定义了唯送信道，因为箭头指向了 `chan`。在第 12 行，我们试图通过唯送信道接收数据，于是编译器报错：
+
+```
+main.go:11: invalid operation: <-sendch (receive from send-only type chan<- int)
+```
+
+一切都很顺利，只不过一个不能读取数据的唯送信道究竟有什么意义呢？
+
+这就需要用到信道转换（Channel Conversion）了。把一个双向信道转换成唯送信道或者唯收（Receive Only）信道都是行得通的，但是反过来就不行。
+
+```
+package main
+
+import (
+	"fmt"
+)
+
+func sendData(sendch chan<-int){
+	sendch <- 10
+}
+
+func main(){
+	var sendch chan int = make(chan int)
+	go sendData(sendch)
+	fmt.Println(<-sendch)
+}
+```
+
+在上述程序的第 `12` 行，我们创建了一个双向信道 `cha1`。在第 13 行 `cha1` 作为参数传递给了 `sendData` 协程。在第 57行，函数 `sendData` 里的参数 `sendch chan<- int` 把 `cha1` 转换为一个唯送信道。于是该信道在 `sendData` 协程里是一个唯送信道，而在 Go 主协程里是一个双向信道。该程序最终打印输出 `10`。
+
+`终端输出`：
+
+`API server listening at: 127.0.0.1:23730
+10`
+
+###### 14.4 for range 遍历信道
+
+数据发送方可以关闭信道，通知接收方这个信道不再有数据发送过来。
+
+当从信道接收数据时，接收方可以多用一个变量来检查信道是否已经关闭。
+
+```
+v, ok := <- ch
+```
+
+上面的语句里，如果成功接收信道所发送的数据，那么 `ok` 等于 true。而如果 `ok` 等于 false，说明我们试图读取一个关闭的通道。从关闭的信道读取到的值会是该信道类型的零值。例如，当信道是一个 `int` 类型的信道时，那么从关闭的信道读取的值将会是 `0`
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func producer(chnl chan int){
+	for i := 0;i < 10;i++{
+		chnl <- i
+	}
+	close(chnl)
+}
+
+func main(){
+	ch := make(chan int)
+	go producer(ch)
+	for i := 0;i<10;i++ {
+		data,ok := <-ch
+		if !ok {
+			break
+		}
+		fmt.Println(data)
+	}
+}
+```
+
+在上述的程序中，`producer` 协程会从 0 到 9 写入信道 `chn1`，然后关闭该信道。主函数有一个无限的 for 循环（第 16 行），使用变量 `ok`（第 18 行）检查信道是否已经关闭。如果 `ok` 等于 false，说明信道已经关闭，于是退出 for 循环。如果 `ok` 等于 true，会打印出接收到的值和 `ok` 的值。
+
+```
+API server listening at: 127.0.0.1:26491
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+```
+
+for range
+
+for range 循环用于在一个信道关闭之前，从信道接收数据。
+
+接下来我们使用 for range 循环重写上面的代码。
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func producter(chnl chan int){
+	for i := 0;i < 10;i++{
+		chnl <- i
+	}
+	close(chnl)
+}
+
+func main(){
+	ch := make(chan int)
+	go producter(ch)
+	for data := range ch{
+		fmt.Println(data)
+	}
+}
+```
+
+在第 16 行，for range 循环从信道 `ch` 接收数据，直到该信道关闭。一旦关闭了 `ch`，循环会自动结束。该程序会输出：
+
+```
+API server listening at: 127.0.0.1:39171
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+```
+
+还记得那个cube和spure的例子吗？有一部分代码重复，现在我们把这段代码抽离出来
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func dilter(chnl chan int,num int){
+	for num != 0{
+		dil := num % 10
+		chnl <- dil
+		num /= 10  
+	}
+	close(chnl)
+}//以前的公用部分获取每位上的数字，现在被抽离成公用部分。
+
+func squreFunc(squres chan int,num int){
+	chal := make(chan int)
+	sum := 0
+	go dilter(chal,num)//启动一个协程往信道里面写入num的每位的数字
+	for i := range chal{
+		sum += i * i
+	}
+	squres <- sum
+}
+
+func cubeFunc(cube chan int,num int){
+	chal := make(chan int)
+	sum := 0
+	go dilter(chal,num)//启动一个协程往信道里面写入num的每位的数字
+	for i := range chal{
+		sum += i * i * i
+	}
+	cube <- sum
+}
+
+func main(){
+	num := 144
+	squre := make(chan int)
+	cube := make(chan int)
+	go squreFunc(squre,num)
+	go cubeFunc(cube,num)
+	squres,cubes := <-squre,<- cube
+	fmt.Println("Final output",squres+cubes)
+}
+```
+
+上述程序里的 `dilter 函数，包含了获取一个数的每位数的逻辑，并且 `squareFunc` 和 `cubeFunc` 两个函数并发地调用了 `digits`。当计算完数字里面的每一位数时，第 13 行就会关闭信道。`squareFunc` 和 `cubeFunc` 两个协程使用 for range 循环分别监听了它们的信道，直到该信道关闭。程序的其他地方不变，该程序同样会输出：
+
+`终端输出`:
+
+```
+API server listening at: 127.0.0.1:41615
+Final output 162
+```
 
