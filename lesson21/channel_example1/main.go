@@ -15,7 +15,11 @@ func outputChan(c chan int) {
 }
 
 func main() {
-	var c chan int = make(chan int)
+	var c chan int
+	if c == nil {
+		c = make(chan int)
+		fmt.Printf("type c is %T\n", c)
+	}
 	go inputChan(c)
 	go outputChan(c)
 	time.Sleep(time.Second)
