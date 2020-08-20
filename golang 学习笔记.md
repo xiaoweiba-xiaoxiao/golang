@@ -5689,3 +5689,11 @@ API server listening at: 127.0.0.1:41615
 Final output 162
 ```
 
+###### 14.5 带缓冲区的channel
+
+
+
+```go
+
+```
+
