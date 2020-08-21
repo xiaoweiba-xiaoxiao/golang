@@ -2844,9 +2844,9 @@ API server listening at: 127.0.0.1:21973
 true
 ```
 
-##### 8. IO
+#### 8. IO
 
-###### 8.1 格式化输⼊
+##### 8.1 格式化输⼊
 
  从终端获取⽤户的输⼊
 
@@ -2939,7 +2939,7 @@ func main(){
 //\n可以占位\n所以可以隔行输入
 ```
 
-###### 8.2 从字符串格式化输入
+##### 8.2 从字符串格式化输入
 
 fmt.Sscanf(str, format string, a…interface{}): 格式化输⼊，空格作为分隔符，占位符和
 
@@ -3157,7 +3157,7 @@ hello
 
 ```
 
-###### 8.3 格式化输出
+##### 8.3 格式化输出
 
 fmt.Sprintf(format string, a…interface{}): 格式化并返回字符串
 
@@ -3194,7 +3194,7 @@ hello world!
 
 ```
 
-###### 8.4 终端输⼊输出
+##### 8.4 终端输⼊输出
 
 终端其实是⼀个⽂件 
 
@@ -3228,7 +3228,7 @@ func main(){
 
 ```
 
-###### 8.5 格式化输出
+##### 8.5 格式化输出
 
 fmt.Fprintf(fifile, format string, a…interface{}): 格式化输出，并写⼊到⽂件中
 
@@ -3260,7 +3260,7 @@ hello world hehe
 hello world hehe
 ```
 
-###### 8.7 带缓冲区的读写
+##### 8.7 带缓冲区的读写
 
 ```go
 package main
@@ -3286,7 +3286,7 @@ hello world
 you input is hello world
 ```
 
-###### 8.8 命令行参数获取
+##### 8.8 命令行参数获取
 
 ```go
 package main
@@ -3446,9 +3446,9 @@ recusive is  true
 language is  chinses
 ```
 
-##### 9. 文件读写
+#### 9. 文件读写
 
-###### 9.1 文件打开和读写
+##### 9.1 文件打开和读写
 
 ```go
 package main
@@ -3500,7 +3500,7 @@ file is open 32222
 
 文件读取, file.Read和file.ReadAt。读到文件末尾返回:io.EOF
 
-###### 9.2 bufio读取文件
+##### 9.2 bufio读取文件
 
 ```go
 package main
@@ -3624,7 +3624,7 @@ func main(){
 
 ```
 
-###### 9.3 文件写入
+##### 9.3 文件写入
 
 
 
@@ -3867,7 +3867,7 @@ func main(){
 }
 ```
 
-###### 9.4 defer解析
+##### 9.4 defer解析
 
 defer原理分析
 
@@ -3955,7 +3955,7 @@ API server listening at: 127.0.0.1:30377
 5
 ```
 
-##### 10.反射
+#### 10.反射
 
 在计算机科学领域，反射是指一类应用，它们能够自描述和自控制。也就是说，这类应用通过采用某种机制来实现对自己行为的描述（self-representation）和监测（examination），并能根据自身行为的状态和结果，调整或修改应用所描述行为的状态和相关的语义。
 
@@ -4029,7 +4029,7 @@ name=chun
 sex=2
 ```
 
-###### 10.1 获取value和type
+##### 10.1 获取value和type
 
 reflect 包提供反射机制
 
@@ -4099,7 +4099,7 @@ API server listening at: 127.0.0.1:34516
 the type is main.Student
 ```
 
-###### 10.2 reflect.Kind
+##### 10.2 reflect.Kind
 
 `reflect` 包中还有一个重要的类型：[`Kind`](https://golang.org/pkg/reflect/#Kind)。
 
@@ -4174,7 +4174,7 @@ const (
 )
 ```
 
-###### 10.3 通过反射设置变量值
+##### 10.3 通过反射设置变量值
 
 ```go
 package main
@@ -4332,7 +4332,7 @@ unkown type
 hello
 ```
 
-###### 10.4 结构体的反射
+##### 10.4 结构体的反射
 
 ```go
 10.4.1 获取结构体的类型和值
@@ -4556,7 +4556,7 @@ func main() {
 
 ```
 
-###### 10.5 反射tag
+##### 10.5 反射tag
 
 ```go
 package main
@@ -4614,9 +4614,9 @@ API server listening at: 127.0.0.1:24685
 map[name:chun sex:2]
 ```
 
-##### 11.测试
+#### 11.测试
 
-###### 11.1 单元测试
+##### 11.1 单元测试
 
 testing
 
@@ -4674,7 +4674,7 @@ PASS
 ok      xiao.com/golang/lesson/lesson19/unit_test       0.002s
 ```
 
-###### 11.2 压力测试
+##### 11.2 压力测试
 
 基准测试或压力测试必须以 Benchmark开头，并且只有参数，
 
@@ -4723,7 +4723,7 @@ ok      xiao.com/golang/lesson/lesson19/unit_test       1.125s
 
 
 
-###### 11.3 go test 命令
+##### 11.3 go test 命令
 
 
 
@@ -4816,7 +4816,7 @@ ok      xiao.com/golang/lesson/lesson19/unit_test       4.388s
 
 go test file file 单元测试某某文件
 
-###### 11.4 dlv调试
+##### 11.4 dlv调试
 
 A. go get github.com/derekparker/delve/cmd/dlv
 
@@ -4903,9 +4903,9 @@ func main() {
 }
 ```
 
-##### 12  panic defer recover
+#### 12  panic defer recover
 
-###### 12.1 panic 是程序崩溃
+##### 12.1 panic 是程序崩溃
 
 ```go
 package main
@@ -4933,7 +4933,7 @@ Process exiting with code: 0
 
 当程序运行出现严重逻辑错误时，我们需要触发panic,来终止程序，不让他继续运行
 
-###### 12.2 defer
+##### 12.2 defer
 
 defer 前面的章节已经有介绍，panic允许defer执行后再panic。
 
@@ -4967,7 +4967,7 @@ main.main()
 Process exiting with code: 0
 ```
 
-###### 12.3 recover
+##### 12.3 recover
 
 recover 恢复panic,使程序继续运行，recover必须再defer 的func中，recover的返回值为panic的返回值。
 
@@ -4999,9 +4999,9 @@ Recovered from panic that is:  b is not 5
 Process exiting with code: 0
 ```
 
-##### 13 多线程
+#### 13 多线程
 
-###### 13.1 并发和并行
+##### 13.1 并发和并行
 
 并发：同一时间段类执行多个操作。
 
@@ -5017,7 +5017,7 @@ C. 当系统中运行大量线程，系统会变的非常慢。
 
 D. 用户态的线程，支持大量线程创建。也叫协程或goroutine。
 
-###### 13.2 goroutine
+##### 13.2 goroutine
 
 goroutine是go的一个轻量级的并发方式，成为协程，以关键字go 加函数方法名
 
@@ -5113,7 +5113,7 @@ API server listening at: 127.0.0.1:14728
 main terminated
 ```
 
-###### 13.2 runtime
+##### 13.2 runtime
 
 多核控制
 
@@ -5156,7 +5156,7 @@ cpu: 2
 再看看cpu的使用情况呢，会发生什么呢
 ```
 
-###### 13.4 Goroutine原理浅析
+##### 13.4 Goroutine原理浅析
 
 A. 一个操作系统线程对应用户态多个goroutine
 
@@ -5194,11 +5194,11 @@ Go语言里，启动一个goroutine很容易：go function 就行，所以每有
 
 当系统调用syscall结束后，M0会“偷”一个上下文，如果不成功，M0就把它的Gouroutine G0放到一个全局的runqueue中，将自己置于线程缓存中并进入休眠状态。全局runqueue是各个P在运行完自己的本地的Goroutine runqueue后用来拉取新goroutine的地方。P也会周期性的检查这个全局runqueue上的goroutine，否则，全局runqueue上的goroutines可能得不到执行而饿死。
 
-##### 14 channel
+#### 14 channel
 
 信道可以想像成 Go 协程之间通信的管道。如同管道中的水会从一端流到另一端，通过使用信道，数据也可以从一端发送，在另一端接收。
 
-###### 14.1 信道的声明
+##### 14.1 信道的声明
 
 所有信道都关联了一个类型。信道只能运输这种类型的数据，而运输其他类型的数据都是非法的。
 
@@ -5390,7 +5390,7 @@ func main(){
 `API server listening at: 127.0.0.1:25540
 Final output 82`
 
-###### 14.2 死锁
+##### 14.2 死锁
 
 使用信道需要考虑的一个重点是死锁。当 Go 协程给一个信道发送数据时，照理说会有其他 Go 协程来接收数据。如果没有的话，程序就会在运行时触发 panic，形成死锁。
 
@@ -5473,7 +5473,7 @@ main.main()
 	/home/golang/writefile/lesson1/main.go:9 +0x55
 Process exiting with code: 0`
 
-###### 14.3 单向信道
+##### 14.3 单向信道
 
 我们目前讨论的信道都是双向信道，即通过信道既能发送数据，又能接收数据。其实也可以创建单向信道，这种信道只能发送或者接收数据。
 
@@ -5531,7 +5531,7 @@ func main(){
 `API server listening at: 127.0.0.1:23730
 10`
 
-###### 14.4 for range 遍历信道
+##### 14.4 for range 遍历信道
 
 数据发送方可以关闭信道，通知接收方这个信道不再有数据发送过来。
 
@@ -5689,11 +5689,337 @@ API server listening at: 127.0.0.1:41615
 Final output 162
 ```
 
-###### 14.5 带缓冲区的channel
+##### 14.5 带缓冲区的channel
 
+###### 14.5.1 声明
 
+我们讨论的主要是无缓冲信道。我们在信道的教程里详细讨论了，无缓冲信道的发送和接收过程是阻塞的。
+
+我们还可以创建一个有缓冲（Buffer）的信道。只在缓冲已满的情况，才会阻塞向缓冲信道（Buffered Channel）发送数据。同样，只有在缓冲为空的时候，才会阻塞从缓冲信道接收数据。
+
+通过向 `make` 函数再传递一个表示容量的参数（指定缓冲的大小），可以创建缓冲信道。
 
 ```go
-
+ch := make(chan type, capacity)
 ```
 
+要让一个信道有缓冲，上面语法中的 `capacity` 应该大于 0。无缓冲信道的容量默认为 0，因此我们在上面创建信道时，省略了容量参数。
+
+我们开始编写代码，创建一个缓冲信道。
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main (){
+	ch := make(chan int,3)
+	ch <- 0
+	ch <- 1
+	ch <- 2
+	fmt.Println(<-ch)
+	fmt.Println(<-ch)
+	fmt.Println(<-ch)
+}
+```
+
+上面的代码创建了一个容量为3的`channel` `ch`,然后往`ch` 里面写入0 ，1，2，然后第一个fmt.Println读取数据0,并打印，第二个fmt.Println读取数据1，并打印，第三个fmt.Println读取数据3，并打印，带缓冲的信道是先进先出。
+
+```
+API server listening at: 127.0.0.1:25202
+0
+1
+2
+```
+
+示例二，编写以协程写入数据。go 主程负责读取数据
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func worker(ch chan int){
+    for i := 0;i < cap(ch);i++{
+        ch <- i
+        time.Sleep(time.Second)
+    }
+}
+
+func main (){
+	ch := make(chan int,3)
+	go worker(ch)
+	fmt.Println(<-ch)
+	fmt.Println(<-ch)
+	fmt.Println(<-ch)
+}
+```
+
+在上面的程序中，第 17 行在 Go 主协程中创建了容量为 2 的缓冲信道 `ch`，而第 178行把 `ch` 传递给了 worker 协程。接下来 Go 主协程休眠了两秒。在这期间，`write` 协程在并发地运行。`write` 协程有一个 for 循环，依次向信道 `ch` 写入 0～4。而缓冲信道的容量为 2，因此 `write` 协程里立即会向 `ch` 写入 0 和 1，接下来发生阻塞，直到 `ch` 内的值被读取。因此，该程序立即打印出下面两行
+
+```
+API server listening at: 127.0.0.1:40901
+0 输出0
+1 等待1秒后输出 1
+2 再等待1苗输出 2
+```
+
+从这么多例子我们看出，信道读取放在启动协程的协程内，这样就能保证信道的阻塞当前线程
+
+我们再写一个例子来更好的理解缓冲的信道的阻塞。
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+	"time"
+)
+
+func worker(ch chan int){
+	for i := 0; i < 5;i++{
+		ch <- i
+		fmt.Fprintf(os.Stdout,"the ch write value %d\n",i)
+	}
+	close(ch)
+}
+
+func main (){
+	ch := make(chan int,2)
+	go worker(ch)
+	time.Sleep(2 * time.Second)
+	for i := range ch {
+		fmt.Printf("read value %d\n",i)
+		time.Sleep(2 * time.Second)
+	}
+}
+```
+
+程序再18行创建了一个容量为2的带缓冲区信道，启动协程worker()往ch里面写数据，由于信道容量只有2，所有每次只能写入2条int数据。此时主协程等待两秒，
+
+开始读取信道ch中的第一条数据，读取以后，信道的长度变为1，即可以再写入一条数据2，在等待两秒，重复上面的步骤再读取一条数据，在写入一条数据。直到写入操作停止。
+
+```
+API server listening at: 127.0.0.1:41879
+the ch write value 0
+the ch write value 1
+read value 0
+the ch write value 2
+read value 1
+the ch write value 3
+read value 2
+the ch write value 4
+read value 3
+read value 4
+```
+
+###### 14.5.2 死锁
+
+当给我们向一个带缓冲区的信道写入数据，如果在其他协程没有读取的信道值的时候，写入超出了信道的容量，写入发生了阻塞。
+
+我们举个例子来看：
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main(){
+	ch := make(chan int,2)
+	ch <- 1
+	ch <- 2
+	ch <- 3
+	fmt.Println(<-ch)
+	fmt.Println(<-ch)
+}
+```
+
+终端输出上可以很清晰的看到报错在程序的11行，由于信道ch的容量已满，有没有程序读取他的值，在写入3的话就会触发死锁
+
+```
+API server listening at: 127.0.0.1:36649
+fatal error: all goroutines are asleep - deadlock!
+
+goroutine 1 [chan send]:
+main.main()
+	/home/golang/writefile/lesson1/main.go:11 +0x9b
+Process exiting with code: 0
+```
+
+同样的如果读取超过了信道的容量也会发射阻塞，因为读取不到数据，也会触发死锁。
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main(){
+	ch := make(chan int,2)
+	ch <- 1
+	fmt.Println(<-ch)
+	fmt.Println(<-ch)
+}
+```
+
+在如下的终端输出可以看到时报错的是11行，由于ch信道内只有一条数据，已经被第一个<-ch读取。所以信道没有数据，11行再去读取就会报错：
+
+```
+API server listening at: 127.0.0.1:41441
+1
+fatal error: all goroutines are asleep - deadlock!
+
+goroutine 1 [chan receive]:
+main.main()
+	/home/golang/writefile/lesson1/main.go:11 +0x12a
+Process exiting with code: 0
+```
+
+###### 14.5.3 长度和容量
+
+我们在使用 `make` 函数创建缓冲信道的时候会指定容量大小。
+
+缓冲信道的长度是指信道中当前排队的元素个数。
+
+可以通过len()来获取channel的长度
+
+可以通过cap()来获取channel的容量
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main(){
+	ch := make(chan int,10)
+    fmt.Printf("the len of ch is %d\n",len(ch))
+	fmt.Printf("the cap of ch is %d\n",cap(ch))
+	ch <- 1
+	ch <- 2
+	ch <- 3
+	fmt.Printf("the len of ch is %d\n",len(ch))
+	fmt.Printf("the cap of ch is %d\n",cap(ch))
+	<-ch
+    fmt.Printf("the len of ch is %d\n",len(ch))
+	fmt.Printf("the cap of ch is %d\n",cap(ch))
+}
+```
+
+程序的第8行创建了一个容量为10的channel ch，此时它的长度是0，容量是10，接着我们写入三条数据，此时长度变成3，容量还是10，接着读取一条数据，此时长度变成2，容量依旧是10。这里可以总结两点：1.信道容量是初始化时固定的，2.一旦数据从信道中被读取，数据就会被信道弹出。
+
+```
+API server listening at: 127.0.0.1:22502
+the len of ch is 0
+the cap of ch is 10
+the len of ch is 3
+the cap of ch is 10
+the len of ch is 2
+the cap of ch is 10
+```
+
+###### 14.5.4 WaitGroup
+
+`WaitGroup` 用于等待一批 Go 协程执行结束。程序控制会一直阻塞，直到这些协程全部执行完毕。假设我们有 3 个并发执行的 Go 协程（由 Go 主协程生成）。Go 主协程需要等待这 3 个协程执行结束后，才会终止。这就可以用 `WaitGroup` 来实现。
+
+```go
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func process(i int,wg *sync.WaitGroup){
+	fmt.Printf("worker is start %d\n",i)
+	time.Sleep(time.Second)
+	fmt.Printf("worker is end %d\n",i)
+	wg.Done()
+}
+
+func main(){
+	var wg sync.WaitGroup
+	for i := 0;i<3;i++{
+		wg.Add(1)
+		go process(i,&wg)
+	}
+	wg.Wait()
+}
+```
+
+waitgroup 是一个结构体类型，我们在第 15 行创建了 `WaitGroup` 类型的变量，其初始值为零值。`WaitGroup` 使用计数器来工作。当我们调用 `WaitGroup` 的 `Add` 并传递一个 `int` 时，`WaitGroup` 的计数器会加上 `Add` 的传参。要减少计数器，可以调用 `WaitGroup` 的 `Done()` 方法。`Wait()` 方法会阻塞调用它的 Go 协程，直到计数器变为 0 后才会停止阻塞。
+
+上述程序里，for 循环迭代了 3 次，我们在循环内调用了 `wg.Add(1)`（第 17 行）。因此计数器变为 3。for 循环同样创建了 3 个 `process` 协程，然后在第 20 行调用了 `wg.Wait()`，确保 Go 主协程等待计数器变为 0。在第 13 行，`process` 协程内调用了 `wg.Done`，可以让计数器递减。一旦 3 个子协程都执行完毕（即 `wg.Done()` 调用了 3 次），那么计数器就变为 0，于是主协程会解除阻塞。
+
+**在第 21 行里，传递 `wg` 的地址是很重要的。如果没有传递 `wg` 的地址，那么每个 Go 协程将会得到一个 `WaitGroup` 值的拷贝，因而当它们执行结束时，`main` 函数并不会知道**。
+
+```
+API server listening at: 127.0.0.1:29851
+worker is start 2
+worker is start 1
+worker is start 0
+worker is end 0
+worker is end 2
+worker is end 1
+```
+
+###### 14.5.5 工作池的实现
+
+缓冲信道的重要应用之一就是实现`工作池`。
+
+一般而言，工作池就是一组等待任务分配的线程。一旦完成了所分配的任务，这些线程可继续等待任务的分配。
+
+我们会使用缓冲信道来实现工作池。我们工作池的任务是计算所输入数字的每一位的和。例如，如果输入 234，结果会是 9（即 2 + 3 + 4）。向工作池输入的是一列伪随机数。
+
+我们工作池的核心功能如下：
+
+- 创建一个 Go 协程池，监听一个等待作业分配的输入型缓冲信道。
+- 将作业添加到该输入型缓冲信道中。
+- 作业完成后，再将结果写入一个输出型缓冲信道。
+- 从输出型缓冲信道读取并打印结果。
+
+我们会逐步编写这个程序，让代码易于理解。我们写一个程序来计算一个数的每一位的和。
+
+首先我们需要两个struct，Job,和result来分别表示作业和结果
+
+```go
+type Job struct {
+	Id, Number int
+}
+
+type Result struct{
+	job Job
+	SumofNum int
+}
+```
+
+接下来我们需要一个创建一个两个信道，用于Job的写入，读取，和result的写入，读取
+
+```go
+var jobChan chan Job = make(chan Job,10)
+var resChan chan Result = make(chan Result,10)
+```
+
+接着我们写一个计算和的函数用于计算各位数的计算，并返回这个计算结果
+
+```go
+func digist(num int) (sum int){
+	for num != 0 {
+		dist := num % 10
+		sum += dist
+		num /= 10
+	}
+	return sum
+} 
+```
+
+再接下来我们需要
