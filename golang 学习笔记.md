@@ -6022,4 +6022,217 @@ func digist(num int) (sum int){
 } 
 ```
 
-再接下来我们需要
+再接下来我们需要一个创建工作协程的函数
+
+
+
+监听一个信道是否写满
+
+```go
+package main
+
+import (
+	"fmt"
+	_"sync"
+	"time"
+)
+
+
+func write(ch chan string){
+	for {
+		select {
+		case ch <- "hello":
+			fmt.Println("hello is write")
+		default:
+			fmt.Println("chan is full")
+		}
+		time.Sleep(time.Millisecond * 500)
+	}
+}
+
+func main(){
+	ch := make(chan string,10)
+	go write(ch)
+	for c := range ch{
+		fmt.Println(c)
+		time.Sleep(time.Second)
+	}
+}
+```
+
+##### 15.2 线程安全
+
+现实例子
+
+A. 多个goroutine同时操作一个资源，这个资源又叫临界区
+
+B. 现实生活中的十字路口，通过红路灯实现线程安全
+
+C. 火车上的厕所，通过互斥锁来实现线程安全线程安全介绍
+
+实际例子， x = x +1
+
+A. 先从内存中取出x的值
+
+B. CPU进行计算，x+1
+
+C. 然后把x+1的结果存储在内存中
+
+![](assets/image-20200824104701687.png)
+
+
+
+
+
+##### 15.2.1 互斥锁
+
+```go
+
+
+
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+var x int
+
+func add(wg *sync.WaitGroup,m *sync.Mutex){
+	m.Lock()
+	x += 1
+	m.Unlock()
+	wg.Done()
+}
+
+func main(){
+	var wg sync.WaitGroup
+	var m sync.Mutex
+	for i := 0;i < 10000;i++{
+		wg.Add(1)
+		go add(&wg,&m)
+	}
+	wg.Wait()
+	fmt.Println(x)
+}
+```
+
+终端输出：
+
+```
+API server listening at: 127.0.0.1:40741
+10000
+```
+
+##### 15.2.2 读写锁
+
+A. 读多写少的场景
+
+B. 分为两种角色，读锁和写锁
+
+C. 当一个goroutine获取写锁之后，其他的goroutine获取写锁或读锁都会等待
+
+D. 当一个goroutine获取读锁之后，其他的goroutine获取写锁都会等待, 但其他
+
+goroutine获取读锁时，都会继续获得锁
+
+
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+var x int
+var rwmutex sync.RWMutex
+
+func read(wg *sync.WaitGroup,i int){
+	rwmutex.RLock()
+	fmt.Println(i)		
+	rwmutex.RUnlock()
+	time.Sleep(time.Second)
+	wg.Done()
+}
+
+func write(wg *sync.WaitGroup){
+	rwmutex.Lock()
+	x +=1
+	rwmutex.Unlock()
+	wg.Done()
+}
+
+func main(){
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go write(&wg)
+	wg.Wait()
+	for i :=0;i<10;i++{
+		wg.Add(1)
+		go read(&wg,i)
+	}
+	wg.Wait()
+}
+```
+
+##### 15.2.3 原子操作
+
+原子操作
+
+A. 加锁代价比较耗时，需要上下文切换
+
+B. 针对基本数据类型，可以使用原子操作保证线程安全
+
+C. 原子操作在用户态就可以完成，因此性能比互斥锁要高
+
+![image-20200824142849849](assets/image-20200824142849849.png)
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"sync/atomic"
+	"time"
+)
+
+var x int32
+var mutex sync.Mutex
+
+func add(wg *sync.WaitGroup){
+	for i := 0; i <10000;i++{
+		// mutex.Lock()
+		// x += 1
+		// mutex.Unlock()
+		atomic.AddInt32(&x,1)
+	}
+	wg.Done()
+}
+
+func main(){
+	start := time.Now().UnixNano()
+	var wg sync.WaitGroup
+	for i :=0;i < 10;i++{
+		wg.Add(1)
+		go add(&wg)
+	}
+	wg.Wait()
+	end := time.Now().UnixNano()
+	fmt.Println(x)
+	fmt.Println((end - start)/1000)
+}
+```
+
+终端输出：
+
+```
+API server listening at: 127.0.0.1:9690
+100000
+2308
+```
+
