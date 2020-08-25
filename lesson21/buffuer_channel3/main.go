@@ -51,11 +51,9 @@ func worker(wg *sync.WaitGroup) {
 
 /*打印输出*/
 func PrintResult(done chan bool) {
-	/*for res := range resChan {
+	for res := range resChan {
 		fmt.Printf("result of %d job.Number is %d is %d\n", res.job.Id, res.job.Number, res.resNum)
-	}*/
-	res := <-resChan
-	fmt.Printf("result of %d job.Number is %d is %d\n", res.job.Id, res.job.Number, res.resNum)
+	}
 	done <- true
 }
 
