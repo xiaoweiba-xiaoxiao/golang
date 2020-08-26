@@ -6022,4 +6022,571 @@ func digist(num int) (sum int){
 } 
 ```
 
-再接下来我们需要
+接下来我们需要创建一个工作协程。
+
+```go
+func worker(wg *sync.WaitGroup){
+	for job := range jobChan{
+		result := Result{Myjob: job,ResNum:disgit(job.Number)}
+		resChan  <- result
+	}
+	wg.Done()
+}
+```
+
+上面的函数创建了一个工作者（Worker），读取 `jobs` 信道的数据，根据当前的 `job` 和 `digits` 函数的返回值，创建了一个 `Result` 结构体变量，然后将结果写入 `results` 缓冲信道。`worker` 函数接收了一个 `WaitGroup` 类型的 `wg` 作为参数，当所有的 `jobs` 完成的时候，调用了 `Done()` 方法。
+
+有了工作协程，我们就需要创建一个workerpool
+
+```go
+func createWorkerPool(count int){
+	var wg sync.WaitGroup
+	for i := 0; i < count;i++{
+		wg.Add(1)
+		go worker(&wg)
+	}
+	wg.Wait()
+	close(resChan)
+}
+```
+
+上面函数的参数是需要创建的工作协程的数量。在创建 Go 协程之前，它调用了 `wg.Add(1)` 方法，于是 `WaitGroup` 计数器递增。接下来，我们创建工作协程，并向 `worker` 函数传递 `wg` 的地址。创建了需要的工作协程后，函数调用 `wg.Wait()`，等待所有的 Go 协程执行完毕。所有协程完成执行之后，函数会关闭 `results` 信道。因为所有协程都已经执行完毕，于是不再需要向 `results` 信道写入数据了。
+
+再接下来我们需要一个携程函数来为我们创建Job,来分配到工作者
+
+```
+func creatJob(count int){
+    for i := 0;i < count;i++{
+        job := Job {Id: i,Number: rand.Intn(999)}
+        jobChan <- job
+    }
+    close(jobChan)
+}
+```
+
+上面的 `createJob` 函数接收所需创建的作业数量作为输入参数，生成了最大值为 998 的伪随机数，并使用该随机数创建了 `Job` 结构体变量。这个函数把 for 循环的计数器 `i` 作为 id，最后把创建的结构体变量写入 `jobsChan` 信道。当写入所有的 `job` 时，它关闭了 `jobChan` 信道。
+
+然后我们需要一个函数来打印result的内容，并用一个channel来阻塞，防止主进程提前退出
+
+```go
+func printResult(done chan bool){
+	for res := range resChan{
+		fmt.Printf("jobid%d: job num %d,the sum is %d",res.Myjob.Id,res.Myjob.Number,res.ResNum)
+	}
+	done <- true
+}
+```
+
+最后完成完整的代码如下
+
+```go 
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"sync"
+	"time"
+)
+
+type Job struct {
+	Id, Number int
+}
+
+type Result struct {
+	Myjob  Job
+	ResNum int
+}
+
+var jobChan chan Job = make(chan Job, 10)
+var resChan chan Result = make(chan Result, 10)
+
+func disgit(num int) (sum int) {
+	for num != 0 {
+		dig := num % 10
+		sum += dig
+		num /= 10
+	}
+	return sum
+}
+
+func worker(wg *sync.WaitGroup) {
+	for job := range jobChan {
+		result := Result{Myjob: job, ResNum: disgit(job.Number)}
+		resChan <- result
+	}
+	wg.Done()
+}
+
+func createWorkerPool(count int) {
+	var wg sync.WaitGroup
+	for i := 0; i < count; i++ {
+		wg.Add(1)
+		go worker(&wg)
+	}
+	wg.Wait()
+	close(resChan)
+}
+
+func creatJob(count int) {
+	for i := 0; i < count; i++ {
+		job := Job{Id: i, Number: rand.Intn(999)}
+		jobChan <- job
+	}
+	close(jobChan)
+}
+
+func printResult(done chan bool) {
+	for res := range resChan {
+		fmt.Printf("jobid%d: job num %d,the sum is %d\n", res.Myjob.Id, res.Myjob.Number, res.ResNum)
+	}
+	done <- true
+}
+
+func main() {
+	rand.Seed(time.Now().Unix())
+	count := 100
+	var done chan bool = make(chan bool)
+	go creatJob(count)
+	go createWorkerPool(count)
+	go printResult(done)
+	<-done
+}
+
+```
+
+终端输出：
+
+```
+API server listening at: 127.0.0.1:48785
+jobid0: job num 619,the sum is 16
+jobid1: job num 812,the sum is 11
+jobid2: job num 56,the sum is 11
+jobid3: job num 118,the sum is 10
+jobid4: job num 943,the sum is 16
+jobid5: job num 798,the sum is 24
+jobid6: job num 553,the sum is 13
+jobid7: job num 688,the sum is 22
+jobid8: job num 435,the sum is 12
+jobid9: job num 331,the sum is 7
+jobid10: job num 470,the sum is 11
+jobid11: job num 42,the sum is 6
+jobid12: job num 340,the sum is 7
+jobid13: job num 917,the sum is 17
+jobid14: job num 935,the sum is 17
+jobid15: job num 808,the sum is 16
+jobid16: job num 997,the sum is 25
+jobid17: job num 710,the sum is 8
+jobid18: job num 921,the sum is 12
+jobid19: job num 390,the sum is 12
+jobid20: job num 461,the sum is 11
+jobid21: job num 230,the sum is 5
+jobid22: job num 595,the sum is 19
+jobid23: job num 965,the sum is 20
+jobid24: job num 95,the sum is 14
+jobid25: job num 728,the sum is 17
+jobid26: job num 689,the sum is 23
+jobid27: job num 481,the sum is 13
+jobid28: job num 693,the sum is 18
+jobid29: job num 976,the sum is 22
+jobid30: job num 115,the sum is 7
+jobid31: job num 882,the sum is 18
+jobid32: job num 938,the sum is 20
+jobid33: job num 216,the sum is 9
+jobid34: job num 692,the sum is 17
+jobid35: job num 14,the sum is 5
+jobid36: job num 522,the sum is 9
+jobid37: job num 49,the sum is 13
+jobid38: job num 983,the sum is 20
+jobid39: job num 216,the sum is 9
+jobid40: job num 938,the sum is 20
+jobid41: job num 199,the sum is 19
+jobid42: job num 959,the sum is 23
+jobid43: job num 919,the sum is 19
+jobid44: job num 901,the sum is 10
+jobid45: job num 880,the sum is 16
+jobid46: job num 849,the sum is 21
+jobid47: job num 382,the sum is 13
+jobid48: job num 229,the sum is 13
+jobid49: job num 371,the sum is 11
+jobid50: job num 902,the sum is 11
+jobid51: job num 520,the sum is 7
+jobid52: job num 221,the sum is 5
+jobid53: job num 7,the sum is 7
+jobid54: job num 352,the sum is 10
+jobid55: job num 122,the sum is 5
+jobid56: job num 932,the sum is 14
+jobid57: job num 968,the sum is 23
+jobid58: job num 69,the sum is 15
+jobid59: job num 377,the sum is 17
+jobid60: job num 281,the sum is 11
+jobid61: job num 959,the sum is 23
+jobid62: job num 694,the sum is 19
+jobid63: job num 216,the sum is 9
+jobid64: job num 63,the sum is 9
+jobid65: job num 56,the sum is 11
+jobid66: job num 596,the sum is 20
+jobid67: job num 5,the sum is 5
+jobid68: job num 225,the sum is 9
+jobid69: job num 781,the sum is 16
+jobid70: job num 190,the sum is 10
+jobid71: job num 856,the sum is 19
+jobid72: job num 290,the sum is 11
+jobid73: job num 213,the sum is 6
+jobid74: job num 431,the sum is 8
+jobid75: job num 78,the sum is 15
+jobid76: job num 906,the sum is 15
+jobid77: job num 454,the sum is 13
+jobid78: job num 63,the sum is 9
+jobid79: job num 374,the sum is 14
+jobid80: job num 206,the sum is 8
+jobid81: job num 935,the sum is 17
+jobid82: job num 652,the sum is 13
+jobid83: job num 608,the sum is 14
+jobid84: job num 580,the sum is 13
+jobid85: job num 576,the sum is 18
+jobid86: job num 767,the sum is 20
+jobid87: job num 681,the sum is 15
+jobid88: job num 382,the sum is 13
+jobid89: job num 400,the sum is 4
+jobid90: job num 576,the sum is 18
+jobid91: job num 57,the sum is 12
+jobid92: job num 627,the sum is 15
+jobid93: job num 24,the sum is 6
+jobid94: job num 72,the sum is 9
+jobid95: job num 365,the sum is 14
+jobid96: job num 512,the sum is 8
+jobid97: job num 874,the sum is 19
+jobid98: job num 756,the sum is 18
+jobid99: job num 933,the sum is 15
+Process exiting with code: 0
+```
+
+#### 15 select 和线程安全
+
+##### 15.1 select
+
+多channel场景
+select语义介绍和使用
+A. 多个channel同时需要读取或写入，怎么办？
+B. 串行操作？ NONONO
+
+举一个例子
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func server1(chnl chan string) {
+	time.Sleep(time.Second * 6)
+	fmt.Println("server1 begin")
+	chnl <- "from server1"
+}
+
+func server2(chnl chan string) {
+	time.Sleep(time.Second * 3)
+	fmt.Println("server2 begin")
+	chnl <- "from server2"
+}
+
+func main() {
+	output1 := make(chan string)
+	output2 := make(chan string)
+	go server1(output1)
+	go server2(output2)
+	s1 := <-output1
+	fmt.Println(s1)
+	s2 := <-output2
+	fmt.Println(s2)
+}
+
+```
+
+由于我们的代码是从上往下执行，启动server1和server2两个协程时，我们可以看到server2休眠三秒后，将数据写入到了信道，server1则休眠了6秒才将数据写入信道，但是主协程是从上至下执行，所以在`s1 := <- output1`进行了阻塞，等待数据写入信道，然后读取到数据，才放弃阻塞，因此导致了s2 读取时间也变成6秒。所以终端输出是这样
+
+`终端输出`：
+
+```
+API server listening at: 127.0.0.1:29757
+server2 begin
+server1 begin
+from server1
+from server2
+```
+
+假使在高并发的场景中，这样会导致后面准备好返回数据的信道被阻塞，假如server1和server2都同时对某个用户提供数据返回，那就可能造成性能降低，因此select登场
+
+**select**
+
+A. 同时监听一个或多个channel，直到其中一个channel ready 
+B. 如果其中多个channel同时ready，随机选择一个进行操作。
+C. 语法和switch case有点类似，代码可读性更好。
+
+来写一个实例
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func server1(chnl chan string) {
+	time.Sleep(time.Second * 6)
+	chnl <- "from server1"
+}
+
+func server2(chnl chan string) {
+	time.Sleep(time.Second * 3)
+	chnl <- "from server2"
+}
+
+func main() {
+	ch1 := make(chan string)
+	ch2 := make(chan string)
+	go server1(ch1)
+	go server2(ch2)
+	select { //监听ch1,和ch2
+	case data := <-ch1:
+		fmt.Println(data)
+	case data := <-ch2:
+		fmt.Println(data)
+	}
+}
+
+```
+
+从上面我们可以看到select 监听了ch1,和ch2,由于ch1延迟了6秒才会写入数据，ch2,延迟三秒写入数据，因此select 在监听到了ch2写入数据，即<-ch2 ready,因此执行了data := <-ch2的分支
+
+```
+API server listening at: 127.0.0.1:7158
+from server2
+```
+
+在多个分支都处于ready状态的时候，随机选择一个分支执行，我们再来改改上面的代码
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func server1(chnl chan string) {
+	chnl <- "from server1"
+}
+
+func server2(chnl chan string) {
+	chnl <- "from server2"
+}
+
+func main() {
+	ch1 := make(chan string)
+	ch2 := make(chan string)
+	go server1(ch1)
+	go server2(ch2)
+	time.Sleep(time.Millisecond * 100)
+	select {
+	case data := <-ch1:
+		fmt.Println(data)
+	case data := <-ch2:
+		fmt.Println(data)
+	}
+}
+
+```
+
+我们运行五次，程序的输出结果分别是
+
+```
+第一次是from server1
+第二次是from server1
+第三次是from server1
+第四次和第五次是from server2
+```
+
+select 还可以用于检查信道是否被写满的
+
+
+
+##### 15.2 线程安全
+
+现实例子
+
+A. 多个goroutine同时操作一个资源，这个资源又叫临界区
+
+B. 现实生活中的十字路口，通过红路灯实现线程安全
+
+C. 火车上的厕所，通过互斥锁来实现线程安全线程安全介绍
+
+实际例子， x = x +1
+
+A. 先从内存中取出x的值
+
+B. CPU进行计算，x+1
+
+C. 然后把x+1的结果存储在内存中
+
+![](D:/assets/image-20200824104701687.png)
+
+
+
+
+
+##### 15.2.1 互斥锁
+
+```go
+
+
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+var x int
+
+func add(wg *sync.WaitGroup,m *sync.Mutex){
+	m.Lock()
+	x += 1
+	m.Unlock()
+	wg.Done()
+}
+
+func main(){
+	var wg sync.WaitGroup
+	var m sync.Mutex
+	for i := 0;i < 10000;i++{
+		wg.Add(1)
+		go add(&wg,&m)
+	}
+	wg.Wait()
+	fmt.Println(x)
+}
+```
+
+终端输出：
+
+```
+API server listening at: 127.0.0.1:40741
+10000
+```
+
+##### 15.2.2 读写锁
+
+A. 读多写少的场景
+
+B. 分为两种角色，读锁和写锁
+
+C. 当一个goroutine获取写锁之后，其他的goroutine获取写锁或读锁都会等待
+
+D. 当一个goroutine获取读锁之后，其他的goroutine获取写锁都会等待, 但其他
+
+goroutine获取读锁时，都会继续获得锁
+
+
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+var x int
+var rwmutex sync.RWMutex
+
+func read(wg *sync.WaitGroup,i int){
+	rwmutex.RLock()
+	fmt.Println(i)		
+	rwmutex.RUnlock()
+	time.Sleep(time.Second)
+	wg.Done()
+}
+
+func write(wg *sync.WaitGroup){
+	rwmutex.Lock()
+	x +=1
+	rwmutex.Unlock()
+	wg.Done()
+}
+
+func main(){
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go write(&wg)
+	wg.Wait()
+	for i :=0;i<10;i++{
+		wg.Add(1)
+		go read(&wg,i)
+	}
+	wg.Wait()
+}
+```
+
+##### 15.2.3 原子操作
+
+原子操作
+
+A. 加锁代价比较耗时，需要上下文切换
+
+B. 针对基本数据类型，可以使用原子操作保证线程安全
+
+C. 原子操作在用户态就可以完成，因此性能比互斥锁要高
+
+![image-20200824142849849](D:/assets/image-20200824142849849.png)
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+	"sync/atomic"
+	"time"
+)
+
+var x int32
+var mutex sync.Mutex
+
+func add(wg *sync.WaitGroup){
+	for i := 0; i <10000;i++{
+		// mutex.Lock()
+		// x += 1
+		// mutex.Unlock()
+		atomic.AddInt32(&x,1)
+	}
+	wg.Done()
+}
+
+func main(){
+	start := time.Now().UnixNano()
+	var wg sync.WaitGroup
+	for i :=0;i < 10;i++{
+		wg.Add(1)
+		go add(&wg)
+	}
+	wg.Wait()
+	end := time.Now().UnixNano()
+	fmt.Println(x)
+	fmt.Println((end - start)/1000)
+}
+```
+
+终端输出：
+
+```
+API server listening at: 127.0.0.1:9690
+100000
+2308
+```
+
