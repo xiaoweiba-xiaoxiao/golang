@@ -1,0 +1,61 @@
+<html>
+<head>
+    <title>欢迎您</title>    
+</head>
+<body>
+    {{ range .}}
+    <div>       
+        <table border="1px" >
+            
+            <tr>
+                <td>
+                    hello {{.Name}},welcom
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    name: {{.Name}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    sex: {{.Sex}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    age: {{.Age}}
+                </td>
+            </tr>
+            {{if lt .Age 18}}           
+            <tr>
+                <td>
+                    kind: lovely 
+                </td>
+            </tr>
+            {{else}}
+            <tr>
+                <td>
+                    kind: beauty
+            </tr>
+            {{end}}
+            {{with .Adress}}
+            <tr>
+                <td>
+                    city: {{.City}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    province: {{.Province}}
+                </td>
+            </tr>
+            {{end}}
+        </table>       
+    </div>
+    <div style="margin: 2px;">
+        <p></p>
+    </div>    
+    {{end}}
+</body>
+</html>
