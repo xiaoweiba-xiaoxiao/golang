@@ -42,7 +42,7 @@ func welcom(w http.ResponseWriter, r *http.Request) {
 		var users []*User
 		for i := 0; i < 10; i++ {
 			user := User{
-				Name: fmt.Sprintf("danmei%d", i),
+				Name: fmt.Sprintf("heihei%d", i),
 				Sex:  "女",
 				Age:  rand.Intn(29),
 				Adress: Adress{
