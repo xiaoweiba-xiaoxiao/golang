@@ -4,6 +4,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+
+	"xiao.com/golang/lesson/lesson24/yaml"
 )
 
 type Servers struct {
@@ -30,5 +32,10 @@ func main() {
 		return
 	}
 	fmt.Printf("%#v", servers)
-
+	file := "test.yaml"
+	yaml1 := yaml.NewYaml()
+	data, _ = yaml1.ReadFile(file)
+	fmt.Println(data)
+	ok := yaml1.WriteFile(file)
+	fmt.Println(ok)
 }

@@ -1,0 +1,30 @@
+//指定版本
+syntax="proto3";
+
+//生成go的包文件的名称
+package address;
+
+//枚举hometype
+//enum 的第一项必须为0
+enum PhoneType{
+    HOME = 0;
+    WORK = 1;
+}
+
+message Phone{
+    PhoneType type = 1;
+    string number = 2;
+}
+
+message Person {
+    //后面的数字表示标识号
+    int32 id = 1;
+    string name = 2;
+    //repeated表示可重复
+    //可以有多个手机
+    repeated Phone phones = 3;
+}
+//联系薄
+message PhoneBook {
+    repeated Person persons = 1;
+}
