@@ -62,10 +62,42 @@ func testList() {
 		return
 	}
 	fmt.Printf("the key get %v\n", r)
+}
 
+func testMset() {
+	conn, err := redis.Dial("tcp", "localhost:6379")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer conn.Close()
+	_, err = conn.Do("mset", "abc", 1, "bcd", 3)
+	if err != nil {
+		fmt.Println("mset failed,error: ", err)
+		return
+	}
+	r, err := redis.Ints(conn.Do("mget", "abc", "bcd"))
+	if err != nil {
+		fmt.Println("mget failed,error: ", err)
+		return
+	}
+	fmt.Println(r)
+}
+
+func testExpire() {
+	conn, err := redis.Dial("tcp", "localhost:6379")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer conn.Close()
+	_, err = conn.Do("expire", "abc", 10)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 
 func main() {
 	// testHash()
-	testList()
+	// testMset()
+	testExpire()
 }
